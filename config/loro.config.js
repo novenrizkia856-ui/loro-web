@@ -54,7 +54,7 @@ export const networks = {
 };
 
 export const defaultNetwork = "robinhood";
-export const docsUrl = "";
+export const docsUrl = "docs";
 
 /* Project token contract address (CA), separate from LoroLoan and LoroLens.
    Shown in the landing page's "Contract address" bar. null = "Coming soon".

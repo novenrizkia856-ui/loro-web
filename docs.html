@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loro: Documentation</title>
+  <meta name="description" content="How Loro works: fixed rate, fixed term, isolated peer to peer loans against Stock Tokens and ETH, with a timestamp default and a Dutch auction.">
+  <meta name="theme-color" content="#2f6bc0">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/base.css">
+  <link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-mark" viewBox="0 0 32 32">
+      <path d="M9 5.5V26.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="square" fill="none"/>
+      <path d="M9 26.5H23.5" stroke="#ff7a1f" stroke-width="2.6" stroke-linecap="square" fill="none"/>
+      <rect x="8" y="14.9" width="2.2" height="2.2" fill="#ff7a1f"/>
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V6M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <!-- ============ HEADER ============ -->
+  <header class="hdr" id="hdr">
+    <a class="brand" href="./" aria-label="Loro home">
+      <svg aria-hidden="true"><use href="#i-mark"/></svg>
+      <span>Loro</span>
+    </a>
+
+    <nav class="hdr-nav" aria-label="Primary">
+      <a href="./#about">About</a>
+      <a href="./#how">How it works</a>
+      <a href="./#features">Why Loro</a>
+      <a href="docs" aria-current="page">Docs</a>
+    </nav>
+
+    <div class="hdr-right">
+      <a class="btn btn-accent" href="app">Open app</a>
+      <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mSheet">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="m-scrim" id="mScrim" aria-hidden="true"></div>
+  <div class="m-sheet" id="mSheet" aria-hidden="true">
+    <nav aria-label="Primary, mobile">
+      <a href="./#about">About</a>
+      <a href="./#how">How it works</a>
+      <a href="./#features">Why Loro</a>
+      <a href="docs" aria-current="page">Docs</a>
+      <a href="app">Open app</a>
+    </nav>
+  </div>
+
+  <!-- ============ SKY BAND ============ -->
+  <section class="docs-sky">
+    <div class="sky" aria-hidden="true">
+      <svg class="sky-clouds" viewBox="0 0 1600 520" preserveAspectRatio="none">
+        <filter id="cloudsDocs" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.0022 0.0072" numOctaves="6" seed="9"/>
+          <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3.3 0 0 0 -1.6"/>
+          <feGaussianBlur stdDeviation="0.8"/>
+        </filter>
+        <rect width="1600" height="520" filter="url(#cloudsDocs)"/>
+      </svg>
+    </div>
+    <div class="wrap docs-sky-inner">
+      <p class="docs-kicker">Loro Protocol</p>
+      <h1 class="docs-title">Documentation</h1>
+      <p class="docs-lead">How a Loro loan works, from the offer to the deadline, and what the contracts do and do not promise.</p>
+      <div class="docs-quick">
+        <a href="#lifecycle">Loan lifecycle</a>
+        <a href="#auction">Dutch auction</a>
+        <a href="#contracts">Contracts</a>
+        <a href="#fees">Fees</a>
+        <a href="#deployment">Deployment</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DOCS ============ -->
+  <div class="wrap docs-layout">
+
+    <aside class="docs-side">
+      <details class="toc-mobile" id="tocMobile">
+        <summary><span>On this page</span><b id="tocCurrent">Overview</b></summary>
+      </details>
+      <nav class="toc" id="toc" aria-label="Documentation chapters">
+        <a href="#overview">Overview</a>
+        <a href="#problem"><i>1</i>Problem and positioning</a>
+        <a href="#protocol"><i>2</i>Protocol overview</a>
+        <a href="#roles"><i>3</i>Participants and roles</a>
+        <a href="#lifecycle"><i>4</i>Loan lifecycle</a>
+        <a href="#collateral"><i>5</i>Collateral and risk model</a>
+        <a href="#auction"><i>6</i>Auction and default</a>
+        <a href="#contracts"><i>7</i>Smart contract architecture</a>
+        <a href="#fees"><i>8</i>Fees and incentives</a>
+        <a href="#quantix"><i>9</i>Loro and Quantix Finance</a>
+        <a href="#token"><i>10</i>Token and ecosystem fit</a>
+        <a href="#security"><i>11</i>Security considerations</a>
+        <a href="#deployment"><i>12</i>Deployment and verification</a>
+        <a href="#glossary"><i>13</i>Glossary and FAQ</a>
+      </nav>
+    </aside>
+
+    <main class="doc" id="doc">
+
+      <!-- ============ OVERVIEW ============ -->
+      <section class="chapter" id="overview">
+        <h2>Loro Protocol</h2>
+        <p>Loro is a permissionless, fixed term, overcollateralized lending protocol on Robinhood Chain. Holders of Stock Tokens or ETH can unlock stablecoin without selling. Lenders earn a fixed return that is agreed before the loan starts. There is no price oracle, no underwriting committee, no KYC and no admin key.</p>
+        <p>Today there are two ways to raise cash against an onchain asset, and neither fits a self custody chain:</p>
+        <ul>
+          <li><strong>Sell the asset.</strong> You give up the upside and may trigger a disposal you did not want yet.</li>
+          <li><strong>Borrow through a credit desk.</strong> That means identity checks, a person deciding whether you qualify, and a legal agreement that lives outside the chain.</li>
+        </ul>
+        <p>Loro is the third option: a loan is a smart contract. The terms are fixed when the loan opens, the collateral is held by code, and if the borrower does not repay, the collateral is sold in a public auction that pays the lender. Nobody manages anybody else's risk, nobody has to be identified, and nothing can be paused, upgraded or overridden.</p>
+
+        <div class="facts-card">
+          <div class="facts-head">
+            <b>Live deployment</b>
+            <a class="facts-link" data-cfg-explorer target="_blank" rel="noopener">Explorer ↗</a>
+          </div>
+          <dl class="facts-grid">
+            <div><dt>Network</dt><dd><span data-cfg="name">Loading</span> <span class="muted">chain <span data-cfg="chainId">…</span></span></dd></div>
+            <div><dt>LoroLoan</dt><dd><a class="addr" data-cfg-addr="loroLoan">Loading</a></dd></div>
+            <div><dt>LoroLens</dt><dd><a class="addr" data-cfg-addr="loroLens">Loading</a></dd></div>
+            <div><dt>Stablecoin</dt><dd><span data-cfg="stableSymbol">…</span> <a class="addr" data-cfg-addr="stablecoin">Loading</a></dd></div>
+            <div><dt>Protocol fee</dt><dd>10% of the fixed interest on the Robinhood Chain deployment <span class="muted">(feeBps 1000)</span></dd></div>
+            <div><dt>Admin keys</dt><dd>None. No owner, no pause, no upgrade path.</dd></div>
+          </dl>
+        </div>
+
+        <div class="callout">
+          <b>Part of a product family on Robinhood Chain.</b> Loro sits next to Flur (claim link transfers), Roxy (recurring Stock Token buying), Pexo (downside floor protection) and DORT (approval expiry). Pexo protects a position and Roxy builds one; Loro lets a holder raise cash against a position without closing it.
+        </div>
+      </section>
+
+      <!-- ============ 1 ============ -->
+      <section class="chapter" id="problem">
+        <h2><i>1</i>Problem and positioning</h2>
+
+        <h3>1.1 The liquidity problem on Robinhood Chain</h3>
+        <p>Holders of Stock Tokens and ETH on Robinhood Chain who need cash today have two options:</p>
+        <ol>
+          <li><strong>Sell.</strong> Realize the position, give up any further upside, and possibly trigger a disposal they did not want yet.</li>
+          <li><strong>Go offchain.</strong> Use a centralized desk or an institutional credit platform: identity verification, a human underwriter deciding whether to trust them, and a legal contract outside the chain.</li>
+        </ol>
+        <p>Neither fits a chain built around self custody and permissionless tokenized assets.</p>
+
+        <h3>1.2 Where the idea comes from</h3>
+        <p>The starting point was Quantix Finance, an onchain credit platform on Tron that pairs a retail fixed yield vault with an institutional credit marketplace. In that institutional model a Delegate manages a lending pool: they underwrite borrowers, set risk parameters, monitor loans and post first loss capital, while verified lenders and borrowers sign a Master Loan Agreement, and margin calls follow live collateral prices.</p>
+        <p>That model works, but it brings back the trust a permissionless chain is meant to remove. Lenders trust a Delegate's judgment and not only the collateral, borrowers must be identified, and disputes are settled offchain.</p>
+
+        <h3>1.3 What Loro does differently</h3>
+        <p>Loro keeps the useful part, matching people who hold idle stablecoin with people who hold collateral and want cash, and removes everything that depends on a trusted person or an offchain process.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>A credit desk relies on</th><th>Loro replaces it with</th></tr></thead>
+            <tbody>
+              <tr><td>A Delegate's underwriting judgment</td><td>Terms written by the lender when they create an offer, with no judgment calls afterwards</td></tr>
+              <tr><td>KYC and KYB</td><td>Nothing. Any wallet can take part</td></tr>
+              <tr><td>A live price oracle for margin calls</td><td>A deadline. If the loan is not repaid by then, it goes to auction</td></tr>
+              <tr><td>Liquidation run by the platform</td><td>A public Dutch auction that anyone can open and anyone can fill</td></tr>
+              <tr><td>A Master Loan Agreement</td><td>The escrow logic of the contract, which is the whole agreement</td></tr>
+              <tr><td>Pooled lender capital with shared first loss</td><td>One lender and one borrower per loan, fully isolated</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The result is a narrower product than a full credit platform, but trust is never required and the entire life of a loan is enforced by one immutable contract.</p>
+
+        <h3>1.4 Fit with the product line</h3>
+        <ul>
+          <li><strong>Roxy</strong> builds a Stock Token position over time.</li>
+          <li><strong>Pexo</strong> protects the downside of a position that already exists.</li>
+          <li><strong>Loro</strong> turns that position into collateral for cash, without selling it.</li>
+          <li><strong>DORT</strong> makes sure the approvals all of the above rely on do not linger forever.</li>
+        </ul>
+      </section>
+
+      <!-- ============ 2 ============ -->
+      <section class="chapter" id="protocol">
+        <h2><i>2</i>Protocol overview</h2>
+
+        <h3>2.1 In one sentence</h3>
+        <p>Loro is a peer to peer, fixed rate, fixed term, collateralized loan contract: a lender funds an offer, a borrower accepts it by locking the exact collateral it asks for, both sides know the repayment amount and the deadline from the first second, and if the deadline passes unpaid the collateral is sold in a public auction for the lender.</p>
+
+        <h3>2.2 What Loro is not</h3>
+        <ul>
+          <li><strong>Not a pool.</strong> No shared liquidity, no share tokens, no socialized losses.</li>
+          <li><strong>Not variable rate.</strong> Interest is a fixed stablecoin amount, agreed once.</li>
+          <li><strong>Not oracle dependent.</strong> No part of the contract reads a price.</li>
+          <li><strong>Not upgradeable.</strong> No proxy, no admin key, no pause, no parameter that can change after deployment.</li>
+          <li><strong>Not identity gated.</strong> No KYC and no allowlist. The only roles are the lender and the borrower of one specific loan.</li>
+        </ul>
+
+        <h3>2.3 The flow</h3>
+        <ol class="steps-list">
+          <li>A <strong>lender</strong> creates an offer and escrows the principal. The offer states the collateral asset and exact amount, the principal, the fixed interest, the term, and the auction terms.</li>
+          <li>A <strong>borrower</strong> accepts an open offer by locking the collateral. The principal is sent to the borrower in the same transaction.</li>
+          <li>Up to and including the deadline second, the borrower can <strong>repay</strong> principal plus interest and gets the collateral back in the same transaction.</li>
+          <li>Once the deadline has passed, <strong>anyone</strong> can open the Dutch auction for that loan.</li>
+          <li><strong>Anyone</strong> can fill the auction at the current price. The payment is credited to the lender and the buyer receives the collateral.</li>
+          <li>If nobody fills it before the auction window ends, the <strong>lender claims the collateral</strong> directly and absorbs any shortfall, which is limited to that one loan.</li>
+          <li>After a repayment or an auction fill, the lender <strong>withdraws the proceeds</strong> credited to the loan.</li>
+        </ol>
+
+        <h3>2.4 Design principles</h3>
+        <ul>
+          <li>No owner or admin function of any kind.</li>
+          <li>No upgrade path. What is deployed is final.</li>
+          <li>No oracle and no reliance on a third party price feed.</li>
+          <li>No backend. The app reads the chain directly; an indexer could make it faster, but the protocol never needs one.</li>
+        </ul>
+      </section>
+
+      <!-- ============ 3 ============ -->
+      <section class="chapter" id="roles">
+        <h2><i>3</i>Participants and roles</h2>
+        <p>Loro has two roles and both exist only per loan. Nobody holds a standing role in the protocol.</p>
+
+        <h3>3.1 Lender</h3>
+        <ul>
+          <li>Creates an offer and escrows the principal in the deployment's stablecoin.</li>
+          <li>Chooses the collateral asset and the exact amount a borrower must lock, the fixed interest, the term, the auction ceiling and the auction window.</li>
+          <li>Can cancel an offer that nobody has accepted yet; the principal comes back.</li>
+          <li>After a repayment or an auction fill, withdraws the proceeds credited to the loan.</li>
+          <li>If the auction ends unfilled, claims the collateral.</li>
+        </ul>
+
+        <h3>3.2 Borrower</h3>
+        <ul>
+          <li>Browses open offers and accepts one that fits their collateral and cash need. A lender cannot accept their own offer.</li>
+          <li>Locks exactly the collateral the offer asks for. There are no margin calls during the loan, because there is no price to check against.</li>
+          <li>Receives the principal in the acceptance transaction.</li>
+          <li>Is the only address that can repay, and the collateral always returns to the borrower.</li>
+          <li>If they do not repay by the deadline, the collateral goes to auction. Loro has no surplus refund: whatever a buyer pays is credited to the lender.</li>
+        </ul>
+
+        <h3>3.3 Anyone else</h3>
+        <p>Any address, not only the two parties, can:</p>
+        <ul>
+          <li>Open the auction of a loan that is past its deadline, so defaults do not depend on the lender remembering to act.</li>
+          <li>Fill an open auction and receive the collateral.</li>
+          <li>Send the accrued protocol fees to the fixed treasury address.</li>
+        </ul>
+        <p>This is the same permissionless keeper pattern DORT uses for approval expiry.</p>
+
+        <h3>3.4 What does not exist</h3>
+        <ul>
+          <li>No Delegate, underwriter or pool manager.</li>
+          <li>No KYC or KYB provider.</li>
+          <li>No governance with power over live loans.</li>
+          <li>No admin address anywhere in the contracts.</li>
+        </ul>
+      </section>
+
+      <!-- ============ 4 ============ -->
+      <section class="chapter" id="lifecycle">
+        <h2><i>4</i>Loan lifecycle</h2>
+
+        <h3>4.1 States</h3>
+        <p>An offer and the loan it becomes share one id. Every status below is final except where an arrow leaves it.</p>
+        <div class="states">
+          <div class="state-row"><span class="st">Offered</span><span class="arr">cancelOffer</span><span class="st st-end">Cancelled</span></div>
+          <div class="state-row"><span class="st">Offered</span><span class="arr">acceptOffer</span><span class="st">Active</span><span class="arr">repay</span><span class="st st-end">Repaid</span></div>
+          <div class="state-row"><span class="st">Active</span><span class="arr">openAuction</span><span class="st">AuctionOpen</span><span class="arr">fillAuction</span><span class="st st-end">Settled</span></div>
+          <div class="state-row"><span class="st">AuctionOpen</span><span class="arr">claimCollateral</span><span class="st st-end">ClaimedByLender</span></div>
+        </div>
+
+        <h3>4.2 Step by step</h3>
+
+        <h4>Step 1: create an offer</h4>
+        <p>The lender calls <code>createOffer</code> and escrows the principal. The offer records:</p>
+        <ul>
+          <li><code>collateralAsset</code>: the collateral token, or the zero address for native ETH.</li>
+          <li><code>collateralAmount</code>: the exact number of collateral units a borrower must lock. The contract never converts this into a value; any collateral ratio is the lender's own judgment.</li>
+          <li><code>principal</code>: the stablecoin amount lent.</li>
+          <li><code>interest</code>: the fixed stablecoin amount owed on top of the principal. It is a flat amount, not a rate that accrues. The app shows an implied APR for information only.</li>
+          <li><code>duration</code>: seconds from acceptance to the deadline, between 1 second and 3650 days.</li>
+          <li><code>auctionCeiling</code> and <code>auctionWindow</code>: the auction's starting price and how long it takes to fall to the floor. See chapter 6.</li>
+        </ul>
+
+        <h4>Step 2: accept the offer</h4>
+        <p>A borrower calls <code>acceptOffer</code>. For an ETH offer they send exactly <code>collateralAmount</code> with the call; for a token offer they approve that exact amount first. In one transaction the contract locks the collateral, records <code>maturity = block.timestamp + duration</code>, sends the principal to the borrower and marks the loan Active.</p>
+
+        <h4>Step 3a: repay</h4>
+        <p>While <code>block.timestamp &lt;= maturity</code>, the borrower calls <code>repay</code> and pays principal plus interest. The collateral returns to the borrower in the same transaction, the loan becomes Repaid, and the payment minus the protocol fee is credited to the lender.</p>
+
+        <h4>Step 3b: default</h4>
+        <p>From the first second after the deadline, repayment is closed, even if nobody has opened the auction yet. Anyone can call <code>openAuction</code>. It is a pure timestamp check, with no price involved. The loan becomes AuctionOpen and the price starts at the ceiling.</p>
+
+        <h4>Step 4: auction fill or lender claim</h4>
+        <ul>
+          <li>While the auction window is running, including its last second, anyone can call <code>fillAuction</code>. The buyer pays the current price, receives the collateral, and the loan becomes Settled.</li>
+          <li>Once the window has ended with no fill, only the lender can call <code>claimCollateral</code> and receive the collateral. The loan becomes ClaimedByLender.</li>
+        </ul>
+
+        <h4>Step 5: withdraw proceeds</h4>
+        <p>After Repaid or Settled, the lender calls <code>withdrawProceeds</code> once to receive what was credited. Payments are pulled rather than pushed so a lender address that cannot receive the stablecoin can never block a borrower from repaying.</p>
+
+        <h3>4.3 Worked example</h3>
+        <div class="example">
+          <p>A lender offers <strong>5,000 USDG</strong> for a 30 day term, asks for a fixed <strong>400 USDG</strong> of interest, and requires <strong>25 units</strong> of a Stock Token as collateral. They set the auction ceiling at <strong>7,290 USDG</strong> with a <strong>48 hour</strong> window. The protocol fee is 10% of interest, so 40 USDG.</p>
+          <ul>
+            <li><strong>Accepted.</strong> The borrower locks the 25 units and receives 5,000 USDG.</li>
+            <li><strong>Repaid on day 30.</strong> The borrower pays 5,400 USDG and gets the 25 units back. The lender can withdraw 5,360 USDG.</li>
+            <li><strong>Or not repaid.</strong> After the deadline anyone opens the auction. The price starts at 7,290 and falls in a straight line to 5,400 over 48 hours. A buyer who fills it after 24 hours pays 6,345.00 USDG and receives the collateral. The lender can withdraw 6,305.00 USDG.</li>
+            <li><strong>Or nobody buys.</strong> After 48 hours the lender claims the 25 units directly.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============ 5 ============ -->
+      <section class="chapter" id="collateral">
+        <h2><i>5</i>Collateral and risk model</h2>
+
+        <h3>5.1 Why there is no oracle</h3>
+        <p>Loro never reads the price of a Stock Token or ETH. Two decisions make that possible:</p>
+        <ol>
+          <li><strong>The lender sets the collateral amount once, when creating the offer.</strong> The lender is best placed to judge how volatile an asset is and how much buffer they want. The protocol does not need to recheck that judgment every block, and converting a Stock Token amount into a stablecoin value would need a price the contract does not have.</li>
+          <li><strong>Default is triggered only by time.</strong> A loan cannot become undercollateralized in the middle of its term, because nothing ever checks.</li>
+        </ol>
+
+        <h3>5.2 What this means in practice</h3>
+        <ul>
+          <li>There are no margin calls during the term.</li>
+          <li>A lender who asks for too little collateral, or lends against an asset that falls hard before the deadline, carries that risk alone. It never touches another loan or another lender.</li>
+          <li>A borrower who defaults loses all of the collateral, including any value above the debt. Only what an auction buyer pays above the floor reaches anyone, and that goes to the lender.</li>
+          <li>This is the trade for removing the oracle: Loro does not protect anyone from a bad initial risk decision. It guarantees that whatever collateral exists is settled fairly and promptly after the deadline.</li>
+        </ul>
+
+        <h3>5.3 Isolation</h3>
+        <ul>
+          <li>No shared liquidity pool and no shared collateral basket.</li>
+          <li>Every loan stores its own terms, parties, timestamps and proceeds, and every action reads and writes only that loan.</li>
+          <li>One default has no effect on any other loan.</li>
+        </ul>
+
+        <h3>5.4 Shortfalls</h3>
+        <p>If the collateral is worth less than the debt, nobody will fill the auction at or above the floor. When the window ends, the lender claims all of the collateral and accepts the shortfall. The loss is bounded by what they could see when they made the offer, and it is never covered by anyone else's funds.</p>
+
+        <h3>5.5 Assets</h3>
+        <ul>
+          <li><strong>Principal:</strong> one standard stablecoin per deployment, fixed at deployment. On Robinhood Chain it is USDG.</li>
+          <li><strong>Collateral:</strong> native ETH or a standard ERC20, chosen by the lender. The intended assets are Robinhood Chain Stock Tokens and ETH. The app lists known assets and warns on custom addresses.</li>
+          <li>The collateral cannot be the stablecoin itself, the loan contract, or an address without code.</li>
+          <li>Every token transfer must move exactly the requested amount. Fee on transfer and rebasing tokens are rejected at the point of transfer, not compensated for.</li>
+        </ul>
+
+        <h3>5.6 Risks that come from outside the code</h3>
+        <ul>
+          <li><strong>Stablecoin issuer controls.</strong> If the issuer pauses transfers or blacklists the borrower near the deadline, the borrower cannot repay and the loan can go to auction.</li>
+          <li><strong>Stock Token behavior.</strong> If a Stock Token can rebase, freeze addresses or pause transfers, loans in that token may be unable to return collateral. Check the token's behavior before using it.</li>
+          <li><strong>Sequencer and timestamps.</strong> Deadlines use the block timestamp, which a rollup sequencer sets within a small tolerance and which can be unavailable for a while. Repay well before the deadline. There is no grace period.</li>
+        </ul>
+      </section>
+
+      <!-- ============ 6 ============ -->
+      <section class="chapter" id="auction">
+        <h2><i>6</i>Auction and default mechanism</h2>
+
+        <h3>6.1 Why a Dutch auction</h3>
+        <p>A Dutch auction finds a settlement price without an oracle. The price starts high, which favors the lender, and falls over time until someone is willing to pay, which favors speed. It is a mechanism, not a data feed.</p>
+
+        <h3>6.2 Parameters, set once by the lender</h3>
+        <ul>
+          <li><code>auctionCeiling</code>: the stablecoin price the auction starts at. It must be at least principal plus interest.</li>
+          <li><code>auctionWindow</code>: how long the price takes to fall from the ceiling to the floor, between 1 second and 365 days.</li>
+          <li>The floor is always principal plus interest, the full amount owed. The auction never asks for less than the lender is owed and never more than the ceiling. A ceiling equal to the floor gives a flat price.</li>
+        </ul>
+
+        <h3>6.3 Price curve</h3>
+        <p>The price falls in a straight line and is rounded up, so the buyer never pays below the exact linear price and the lender is never shortchanged by rounding.</p>
+<pre><code>floor   = principal + interest
+elapsed = max(0, now - auctionStart)
+
+price   = floor                                                   if elapsed &gt;= window
+price   = floor + ceil((ceiling - floor) * (window - elapsed) / window)   otherwise</code></pre>
+        <p>At the moment the auction opens the price equals the ceiling. From the end of the window onward it equals the floor. It never increases. The contract computes it with full precision, and the app runs the same formula locally, tested against 160 prices exported from the contract.</p>
+
+        <h3>6.4 Filling</h3>
+        <ul>
+          <li><code>fillAuction</code> can be called by anyone while the window is running, including its final second.</li>
+          <li>The buyer pays exactly the price of the block that includes the transaction. There is no amount argument, so there is nothing to overpay and nothing to refund.</li>
+          <li>The payment minus the protocol fee is credited to the lender, and the collateral goes to the buyer.</li>
+          <li>No allowlist, no bidding rounds and no minimum increments: the first valid transaction wins.</li>
+        </ul>
+
+        <h3>6.5 Unfilled auctions</h3>
+        <p>From the first second after the window ends, only the lender can call <code>claimCollateral</code> and take all of the collateral. There is no fee on a claim. The lender's worst case is always known in advance: at least everything the borrower locked.</p>
+
+        <h3>6.6 Timing rules</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Action</th><th>Allowed when</th></tr></thead>
+            <tbody>
+              <tr><td>Repay</td><td><code>now &lt;= maturity</code>, so repaying in the exact deadline second works</td></tr>
+              <tr><td>Open the auction</td><td><code>now &gt; maturity</code></td></tr>
+              <tr><td>Fill the auction</td><td><code>now &lt;= auctionStart + auctionWindow</code></td></tr>
+              <tr><td>Lender claim</td><td><code>now &gt; auctionStart + auctionWindow</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Each pair is an exact complement: there is never a second where both are allowed and never a gap where neither is.</p>
+
+        <h3>6.7 Why keepers will do it</h3>
+        <p>Opening an auction costs only gas and anyone can do it. Filling one is profitable whenever the falling price sits below what the collateral is worth elsewhere. So in practice a lender does not need to watch their loans; third party keepers and arbitrage bots are expected to settle them, the same way DORT's expiry keepers work.</p>
+      </section>
+
+      <!-- ============ 7 ============ -->
+      <section class="chapter" id="contracts">
+        <h2><i>7</i>Smart contract architecture</h2>
+
+        <h3>7.1 Two contracts</h3>
+        <div class="split">
+          <div class="card">
+            <p class="card-kicker">Holds funds</p>
+            <h4>LoroLoan</h4>
+            <p>The only contract that holds funds or changes state. It creates and cancels offers, accepts them into loans, takes repayment, opens and settles auctions, handles lender claims, credits lender proceeds and accrues the protocol fee.</p>
+          </div>
+          <div class="card">
+            <p class="card-kicker">Read only</p>
+            <h4>LoroLens</h4>
+            <p>A stateless view contract with no funds and no privileges. It returns each loan with its debt, fee, live auction price and available actions, and a paginated query by status, lender, borrower or collateral asset, so the app can load lists in single calls.</p>
+          </div>
+        </div>
+        <p>LoroLoan has three settings, all fixed in its constructor: the <code>stablecoin</code>, the <code>treasury</code> that receives fees, and <code>feeBps</code>. No function can change them and no role could.</p>
+
+        <h3>7.2 Loan record</h3>
+<pre><code>struct Loan {
+    address lender;
+    uint32  duration;          // seconds from acceptance to maturity
+    uint32  auctionWindow;     // seconds the auction price decays over
+    Status  status;
+    address borrower;          // zero until accepted
+    uint40  maturity;          // zero until accepted
+    uint40  auctionStart;      // zero until the auction opens
+    bool    proceedsWithdrawn;
+    address collateralAsset;   // address(0) = native ETH
+    uint256 collateralAmount;  // exact units escrowed on acceptance
+    uint256 principal;         // stablecoin units escrowed by the lender
+    uint256 interest;          // fixed stablecoin units owed on top
+    uint256 auctionCeiling;    // auction start price, &gt;= principal + interest
+    uint256 lenderProceeds;    // stablecoin credited to the lender on close
+}</code></pre>
+
+        <h3>7.3 Functions</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Function</th><th>Who can call it</th><th>When</th></tr></thead>
+            <tbody>
+              <tr><td><code>createOffer</code></td><td>Anyone, who becomes the lender</td><td>Any time</td></tr>
+              <tr><td><code>cancelOffer</code></td><td>The lender</td><td>While Offered</td></tr>
+              <tr><td><code>acceptOffer</code></td><td>Anyone except the lender, who becomes the borrower</td><td>While Offered</td></tr>
+              <tr><td><code>repay</code></td><td>The borrower</td><td>Active, up to the deadline</td></tr>
+              <tr><td><code>openAuction</code></td><td>Anyone</td><td>Active, after the deadline</td></tr>
+              <tr><td><code>fillAuction</code></td><td>Anyone, who becomes the buyer</td><td>AuctionOpen, within the window</td></tr>
+              <tr><td><code>claimCollateral</code></td><td>The lender</td><td>AuctionOpen, after the window</td></tr>
+              <tr><td><code>withdrawProceeds</code></td><td>The lender</td><td>Repaid or Settled, once</td></tr>
+              <tr><td><code>sweepFees</code></td><td>Anyone, always to the fixed treasury</td><td>When fees have accrued</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>7.4 Invariants</h3>
+        <p>These are checked by an invariant campaign that also attempts illegal actions on every run:</p>
+        <ul>
+          <li><strong>Solvency.</strong> The stablecoin held equals escrowed offer principal plus unwithdrawn proceeds plus accrued fees, and the collateral held per asset equals the collateral of Active and AuctionOpen loans.</li>
+          <li>Principal, collateral and proceeds each leave a loan at most once.</li>
+          <li>Only legal status changes happen, and final statuses never change.</li>
+          <li>An action on one loan never modifies another loan.</li>
+          <li>A deadline never changes once set.</li>
+          <li>An open auction's price never increases and stays between floor and ceiling.</li>
+          <li><code>stablecoin</code>, <code>treasury</code> and <code>feeBps</code> never change.</li>
+        </ul>
+
+        <h3>7.5 Left out of v1 on purpose</h3>
+        <ul>
+          <li>No partial funding: one lender funds one offer in full.</li>
+          <li>No partial repayment: principal plus interest, or nothing.</li>
+          <li>One collateral asset per loan.</li>
+          <li>No grace period after the deadline.</li>
+          <li>No special handling for interest bearing or rebasing collateral.</li>
+        </ul>
+        <p>These are reasonable extensions for a later version, not blockers for v1.</p>
+      </section>
+
+      <!-- ============ 8 ============ -->
+      <section class="chapter" id="fees">
+        <h2><i>8</i>Fees and incentives</h2>
+
+        <h3>8.1 Protocol fee</h3>
+        <ul>
+          <li>The fee is a share of the fixed interest: <code>fee = interest * feeBps / 10000</code>, rounded down in the lender's favor.</li>
+          <li>It is taken when a loan closes with a stablecoin payment, on repayment and on an auction fill. The lender is credited the payment minus the fee, so lender economics are the same either way.</li>
+          <li>There is no fee on cancelling an offer or on a lender claim, and the fee never touches principal or collateral. Zero interest means zero fee.</li>
+          <li>Fees accumulate in the contract. Anyone can call <code>sweepFees</code>, which always sends them to the treasury address fixed at deployment, so a treasury that cannot receive can never block a borrower.</li>
+          <li>On the Robinhood Chain deployment <code>feeBps</code> is 1000, which is 10% of the interest. It cannot be changed.</li>
+        </ul>
+
+        <h3>8.2 No interest rate curve</h3>
+        <p>Loro has no pool, so there is no utilization to price against. A rate is whatever a lender offers and a borrower accepts. The market is the list of offers itself.</p>
+
+        <h3>8.3 Keeper incentive</h3>
+        <p>There is no keeper fee. Opening an auction is a cheap timestamp check anyone can make, and filling one pays for itself whenever the price is below the collateral's value elsewhere.</p>
+
+        <h3>8.4 No token required</h3>
+        <p>Like Flur, Roxy, Pexo and DORT, using Loro never requires holding a Loro token. See chapter 10.</p>
+      </section>
+
+      <!-- ============ 9 ============ -->
+      <section class="chapter" id="quantix">
+        <h2><i>9</i>Loro and Quantix Finance</h2>
+        <p>Quantix Finance was the starting point for the idea, so the difference is worth stating plainly.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Dimension</th><th>Quantix Finance</th><th>Loro</th></tr></thead>
+            <tbody>
+              <tr><td>Chain</td><td>Tron</td><td>Robinhood Chain, an Arbitrum Orbit L2 that settles to Ethereum</td></tr>
+              <tr><td>Underwriting</td><td>A Delegate with offchain judgment and first loss capital</td><td>None. The lender writes the terms</td></tr>
+              <tr><td>Identity</td><td>KYC and KYB for lenders and borrowers</td><td>None. Any wallet</td></tr>
+              <tr><td>Legal layer</td><td>An offchain Master Loan Agreement</td><td>None. The contract is the agreement</td></tr>
+              <tr><td>Default trigger</td><td>Live prices and margin calls</td><td>The deadline only</td></tr>
+              <tr><td>Liquidation</td><td>Managed by the platform</td><td>A permissionless public Dutch auction</td></tr>
+              <tr><td>Rate</td><td>Set by the Delegate and pool</td><td>A fixed amount, agreed once</td></tr>
+              <tr><td>Capital</td><td>Pooled, with shared first loss</td><td>One loan at a time, fully isolated</td></tr>
+              <tr><td>Control</td><td>Governance token and pool parameters</td><td>No admin function. Immutable after deployment</td></tr>
+              <tr><td>Audience</td><td>Institutional borrowers and retail vault depositors</td><td>Any Robinhood Chain wallet holding Stock Tokens or ETH</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="pull">Quantix solves the liquidity problem by adding a trusted person to the loop. Loro solves it by removing the need for one.</p>
+      </section>
+
+      <!-- ============ 10 ============ -->
+      <section class="chapter" id="token">
+        <h2><i>10</i>Token and ecosystem fit</h2>
+
+        <h3>10.1 The protocol needs no token</h3>
+        <p>Lending, borrowing, repayment and auctions all settle in the stablecoin, ETH or Stock Tokens that already exist. The contracts do not know about any Loro token.</p>
+
+        <h3>10.2 A separate project token</h3>
+        <p>Following the pattern of the rest of the product line, a separate project token may launch next to Loro. It is not required to use the contracts and it is kept fully apart from the lending logic, so its price can never affect loan safety, collateral or repayment. When it launches, its contract address appears on the home page.</p>
+
+        <h3>10.3 Possible links with other products</h3>
+        <p>None of these are part of v1. They show how the products could work together later:</p>
+        <ul>
+          <li>A Pexo protected position could be used as Loro collateral, flooring the downside and borrowing against it at the same time.</li>
+          <li>A Roxy buying schedule could be funded by a Loro loan instead of idle stablecoin.</li>
+          <li>DORT's approval expiry could act as a safety net for any token approval given to Loro.</li>
+        </ul>
+      </section>
+
+      <!-- ============ 11 ============ -->
+      <section class="chapter" id="security">
+        <h2><i>11</i>Security considerations</h2>
+
+        <div class="callout callout-warn">
+          <b>No independent audit yet.</b> The contracts have gone through an internal review alongside development, described below. That is not a substitute for an independent audit. Size your positions accordingly.
+        </div>
+
+        <h3>11.1 Risk classes and how v1 handles them</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Risk</th><th>Handling in v1</th></tr></thead>
+            <tbody>
+              <tr><td>Reentrancy on functions that move funds</td><td>Every state changing function has a reentrancy guard, and each one writes its new status before any external call. Tested with hostile tokens that try to reenter</td></tr>
+              <tr><td>Two borrowers racing for one offer</td><td>Offers are open until filled; whichever transaction lands first wins. Neither party can lose funds</td></tr>
+              <tr><td>Timestamp games around deadlines</td><td>Only a few seconds of sequencer tolerance exist. Deadlines and auction windows are exact complements, and windows are meant to be hours, not seconds</td></tr>
+              <tr><td>Fee on transfer or rebasing tokens</td><td>Every transfer must move exactly the requested amount or the call reverts</td></tr>
+              <tr><td>Rounding in fees and auction prices</td><td>The fee rounds down and the auction price rounds up, both in the lender's favor</td></tr>
+              <tr><td>A recipient that cannot receive</td><td>Lender proceeds and fees are pulled, so neither can block a repayment</td></tr>
+              <tr><td>Cross loan leakage</td><td>Every action touches only its own loan, checked by an invariant that compares the storage of every other loan after each call</td></tr>
+              <tr><td>Oracle, governance or upgrade attacks</td><td>Out of scope, because there is no oracle, no governance and no proxy</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>11.2 Testing</h3>
+        <ul>
+          <li><strong>Unit tests:</strong> 70 passed, covering every function and state change.</li>
+          <li><strong>Fuzz tests:</strong> 13 passed, on the auction price, fee math and boundaries.</li>
+          <li><strong>Invariant campaign:</strong> 16,384 calls with the isolation and solvency checks from chapter 7, all passing.</li>
+          <li><strong>Local security drill:</strong> 72 checks passed on a live local chain, including the full repay path, the full default path, unauthorized calls and reentrancy attempts, ending with the contract holding zero of every asset.</li>
+          <li><strong>Static analysis:</strong> Slither found 19 informational or low results, each reviewed, with no unresolved finding.</li>
+          <li><strong>App math:</strong> the auction price in the app matches 160 prices computed by the contract bit for bit.</li>
+        </ul>
+      </section>
+
+      <!-- ============ 12 ============ -->
+      <section class="chapter" id="deployment">
+        <h2><i>12</i>Deployment and verification</h2>
+
+        <h3>12.1 Where Loro runs</h3>
+        <p>The addresses below are read from the site's configuration, the same file the app uses. Check them against the explorer before sending funds.</p>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><td>Network</td><td><span data-cfg="name">Loading</span>, chain id <span data-cfg="chainId">…</span></td></tr>
+              <tr><td>LoroLoan</td><td><a class="addr" data-cfg-addr="loroLoan">Loading</a></td></tr>
+              <tr><td>LoroLens</td><td><a class="addr" data-cfg-addr="loroLens">Loading</a></td></tr>
+              <tr><td>Stablecoin</td><td><span data-cfg="stableSymbol">…</span> <a class="addr" data-cfg-addr="stablecoin">Loading</a></td></tr>
+              <tr><td>Explorer</td><td><a class="facts-link" data-cfg-explorer target="_blank" rel="noopener">Loading</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>12.2 How to verify it yourself</h3>
+        <ol>
+          <li>Open LoroLoan on the explorer and read <code>stablecoin</code>, <code>treasury</code> and <code>feeBps</code>. They are immutable.</li>
+          <li>Confirm there is no owner, pause or upgrade function in the verified source.</li>
+          <li>Call <code>auctionPriceAt</code> with any values and compare it to the formula in chapter 6.</li>
+          <li>In the app, every transaction is shown in a review step before your wallet opens, with the exact amounts and the contract function it calls. Approvals are always for the exact amount.</li>
+        </ol>
+
+        <h3>12.3 How the site is built</h3>
+        <p>The site is static HTML, CSS and JavaScript with no backend. The app talks to the chain through your wallet, or a public RPC before a wallet connects. The auction price and loan timing are computed in the browser with the same rules as the contract.</p>
+      </section>
+
+      <!-- ============ 13 ============ -->
+      <section class="chapter" id="glossary">
+        <h2><i>13</i>Glossary and FAQ</h2>
+
+        <dl class="glossary">
+          <div><dt>Offer</dt><dd>A lender's standing proposal: a fixed principal, fixed interest and fixed term against an exact amount of one collateral asset, open until accepted or cancelled.</dd></div>
+          <div><dt>Loan</dt><dd>An offer a borrower has accepted. It now has a deadline and locked collateral, and keeps the offer's id.</dd></div>
+          <div><dt>Fixed interest</dt><dd>A flat stablecoin amount owed on top of the principal, not a rate that accrues over time.</dd></div>
+          <div><dt>Maturity</dt><dd>The exact block timestamp by which the borrower must repay.</dd></div>
+          <div><dt>Floor</dt><dd>Principal plus interest. The lowest price an auction can reach.</dd></div>
+          <div><dt>Auction ceiling</dt><dd>The price an auction starts at, chosen by the lender and at least the floor.</dd></div>
+          <div><dt>Dutch auction</dt><dd>The default settlement: the price to buy a defaulted loan's collateral starts at the ceiling and falls in a straight line to the floor over the auction window.</dd></div>
+          <div><dt>Proceeds</dt><dd>The stablecoin credited to a lender when a loan is repaid or settled, minus the protocol fee, withdrawn with <code>withdrawProceeds</code>.</dd></div>
+        </dl>
+
+        <div class="faq">
+          <details>
+            <summary>What happens if a Stock Token stops trading?</summary>
+            <p>Nobody will fill the auction, so once the window ends the lender claims the collateral and carries the loss. It is the same outcome as any undercollateralized loan, made explicit and limited to that one loan.</p>
+          </details>
+          <details>
+            <summary>Can a borrower repay after the deadline if nobody opened the auction?</summary>
+            <p>No. Repayment closes at the deadline whether or not an auction has been opened. There is no grace period in v1.</p>
+          </details>
+          <details>
+            <summary>Can someone else repay my loan?</summary>
+            <p>No. Only the borrower can repay, and the collateral always goes back to the borrower.</p>
+          </details>
+          <details>
+            <summary>Why do lenders have to withdraw instead of being paid automatically?</summary>
+            <p>If payments were pushed, a lender address that cannot receive the stablecoin could make repayment fail and force a default. Pulling the proceeds means repayment depends only on the borrower.</p>
+          </details>
+          <details>
+            <summary>Does a defaulted borrower get anything back?</summary>
+            <p>No. There is no surplus refund. Whatever an auction buyer pays is credited to the lender, less the fee.</p>
+          </details>
+          <details>
+            <summary>Does Loro hold funds it does not need?</summary>
+            <p>Only for as long as a loan needs them: the principal while an offer is open, the collateral while a loan is active or in auction, unwithdrawn proceeds, and fees until someone sweeps them to the treasury.</p>
+          </details>
+        </div>
+
+        <div class="doc-end">
+          <a class="btn btn-ghost" href="#overview"><svg aria-hidden="true"><use href="#i-up"/></svg>Back to top</a>
+          <a class="btn btn-accent" href="app">Open the app <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="docs-foot">
+    <div class="wrap docs-foot-inner">
+      <p>© 2026 Loro</p>
+      <p><a href="./">Home</a><a href="app">App</a><a href="docs">Docs</a></p>
+    </div>
+  </footer>
+
+  <script src="assets/cursor.js"></script>
+  <script src="assets/docs.js"></script>
+  <script type="module">
+    import { loadConfig } from "./config/loro.config.js";
+    loadConfig().then(window.LoroDocs.applyConfig);
+  </script>
+</body>
+</html>

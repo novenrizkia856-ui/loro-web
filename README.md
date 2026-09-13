@@ -12,13 +12,16 @@ JavaScript. The chain is the source of truth.
 ```
 index.html                 landing page
 app.html                   the app: borrow, lend, my loans, auctions
+docs.html                  protocol documentation (served at /docs)
 config/loro.config.js      networks, addresses, assets  (the only place these live)
 config/loro.local.js       GENERATED Anvil addresses, localhost only, not deployed
 assets/base.css            tokens, reset, header, buttons, sky, cursor (both pages)
 assets/landing.css         landing sections and their motion
 assets/app.css             app components, built on base.css tokens
 assets/landing.js          landing config binding, 3D hero objects, scroll motion, reveals
-assets/cursor.js           custom cursor, magnetic controls, card tilt (both pages)
+assets/cursor.js           custom cursor, magnetic controls, card tilt (every page)
+assets/docs.css            documentation layout
+assets/docs.js             documentation contents menu and deployment values
 assets/content.js          landing marquee copy
 assets/app.js              wallet, reads, transactions
 assets/loro-core.js        protocol math and units, no DOM, mirrors the contract
