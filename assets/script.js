@@ -423,7 +423,7 @@
       transparent: true,
       opacity: 0.95,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       sizeAttenuation: true
     });
 
