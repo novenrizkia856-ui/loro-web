@@ -363,25 +363,44 @@
     }
     globeState.heroX = restX();
 
-    var N = window.innerWidth < 900 ? 3800 : 7000;
+    // Dot matrix sphere in the manner of an ASCII render: square points on
+    // a regular latitude grid, dithered away on the side facing from the
+    // light, framed by construction lines (ring, axes, golden spiral).
+    var small = window.innerWidth < 900;
     var R = 1.12;
-    var GOLDEN = Math.PI * (3 - Math.sqrt(5));
+    var ROWS = small ? 52 : 72;
+    var INK = [0.043, 0.055, 0.067];   // --ink
+    var BRONZE = [0.79, 0.66, 0.49];   // --accent
+    var LIGHT = new THREE.Vector3(-0.55, 0.6, 0.58).normalize();
 
+    var tx = [], ty = [], tz = [];
+    for (var row = 0; row < ROWS; row++) {
+      var lat = -Math.PI / 2 + ((row + 0.5) / ROWS) * Math.PI;
+      var ring = Math.cos(lat);
+      var perRow = Math.max(6, Math.round(ROWS * 2 * ring));
+      var offset = (row % 2) * 0.5;
+      for (var k = 0; k < perRow; k++) {
+        var lon = ((k + offset) / perRow) * Math.PI * 2;
+        tx.push(Math.cos(lon) * ring * R);
+        ty.push(Math.sin(lat) * R);
+        tz.push(Math.sin(lon) * ring * R);
+      }
+    }
+
+    var N = tx.length;
     var positions = new Float32Array(N * 3);
     var colors = new Float32Array(N * 3);
     var starts = new Float32Array(N * 3);
     var targets = new Float32Array(N * 3);
     var delays = new Float32Array(N);
     var phases = new Float32Array(N);
+    var dither = new Float32Array(N);
+    var accent = new Uint8Array(N);
 
     for (var i = 0; i < N; i++) {
-      var y = 1 - (i / (N - 1)) * 2;
-      var rad = Math.sqrt(Math.max(0, 1 - y * y));
-      var theta = GOLDEN * i;
-      var jitter = 1 + (Math.random() - 0.5) * 0.02;
-      targets[i * 3] = Math.cos(theta) * rad * R * jitter;
-      targets[i * 3 + 1] = y * R * jitter;
-      targets[i * 3 + 2] = Math.sin(theta) * rad * R * jitter;
+      targets[i * 3] = tx[i];
+      targets[i * 3 + 1] = ty[i];
+      targets[i * 3 + 2] = tz[i];
 
       var sx = Math.random() * 2 - 1, sy = Math.random() * 2 - 1, sz = Math.random() * 2 - 1;
       var len = Math.sqrt(sx * sx + sy * sy + sz * sz) || 1;
@@ -394,21 +413,8 @@
       positions[i * 3 + 1] = starts[i * 3 + 1];
       positions[i * 3 + 2] = starts[i * 3 + 2];
 
-      // Palette: a cool field with champagne highlights, matching
-      // --accent and --accent-cool in styles.css
-      var shade;
-      if (Math.random() < 0.15) {
-        shade = 0.88 + Math.random() * 0.12;
-        colors[i * 3] = 0.79 * shade;
-        colors[i * 3 + 1] = 0.66 * shade;
-        colors[i * 3 + 2] = 0.49 * shade;
-      } else {
-        shade = 0.24 + Math.random() * 0.42;
-        colors[i * 3] = shade * 0.74;
-        colors[i * 3 + 1] = shade * 0.93;
-        colors[i * 3 + 2] = shade * 1.0;
-      }
-
+      dither[i] = Math.random();
+      accent[i] = Math.random() < 0.06 ? 1 : 0;
       delays[i] = Math.random() * 0.38;
       phases[i] = Math.random() * Math.PI * 2;
     }
@@ -418,7 +424,7 @@
     geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
     var mat = new THREE.PointsMaterial({
-      size: 0.016,
+      size: 0.02,
       vertexColors: true,
       transparent: true,
       opacity: 0.95,
@@ -430,6 +436,59 @@
     var points = new THREE.Points(geo, mat);
     group.add(points);
     group.position.x = globeState.heroX;
+
+    // Construction lines. They follow the sphere's position and scale but
+    // not its spin, and draw themselves in as the sphere forms.
+    var guides = new THREE.Group();
+    scene.add(guides);
+    var guideMat = new THREE.LineBasicMaterial({ color: 0x0b0e11, transparent: true, opacity: 0, depthWrite: false });
+    var guideAccent = new THREE.LineBasicMaterial({ color: 0xc9a97e, transparent: true, opacity: 0, depthWrite: false });
+    var guideLines = [];
+    function addGuide(pts, m) {
+      var g = new THREE.BufferGeometry().setFromPoints(pts);
+      g.setDrawRange(0, 0);
+      guides.add(new THREE.Line(g, m));
+      guideLines.push({ geo: g, count: pts.length });
+    }
+    function circlePts(cx, cy, r, steps) {
+      var out = [];
+      for (var s = 0; s <= steps; s++) {
+        var a = Math.PI / 2 + (s / steps) * Math.PI * 2;
+        out.push(new THREE.Vector3(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 0));
+      }
+      return out;
+    }
+
+    addGuide(circlePts(0, 0, R * 1.08, 160), guideMat);
+    addGuide([new THREE.Vector3(-R * 1.45, R * 0.18, 0), new THREE.Vector3(R * 1.6, R * 0.18, 0)], guideMat);
+    addGuide([new THREE.Vector3(0, R * 1.24, 0), new THREE.Vector3(0, -R * 1.24, 0)], guideMat);
+
+    var PHI = (1 + Math.sqrt(5)) / 2;
+    var growth = Math.log(PHI) / (Math.PI / 2);
+    var eyeX = R * 0.45, eyeY = -R * 0.42;
+    var spiral = [];
+    for (var s = 0; s <= 240; s++) {
+      var th = Math.PI * 1.5 - (s / 240) * Math.PI * 4;
+      var sr = R * 0.5 * Math.exp(growth * (th - Math.PI * 1.5));
+      spiral.push(new THREE.Vector3(eyeX + Math.cos(th) * sr, eyeY + Math.sin(th) * sr, 0));
+    }
+    addGuide(spiral, guideAccent);
+    addGuide(circlePts(eyeX, eyeY, R * 0.1, 64), guideMat);
+
+    // Sparse dust field behind everything
+    var FIELD = small ? 260 : 520;
+    var fieldPos = new Float32Array(FIELD * 3);
+    for (var f = 0; f < FIELD; f++) {
+      fieldPos[f * 3] = (Math.random() * 2 - 1) * 7;
+      fieldPos[f * 3 + 1] = (Math.random() * 2 - 1) * 4;
+      fieldPos[f * 3 + 2] = -1.5 - Math.random() * 2.5;
+    }
+    var fieldGeo = new THREE.BufferGeometry();
+    fieldGeo.setAttribute("position", new THREE.BufferAttribute(fieldPos, 3));
+    var fieldMat = new THREE.PointsMaterial({
+      size: 0.02, color: 0x0b0e11, transparent: true, opacity: 0, depthWrite: false, sizeAttenuation: true
+    });
+    scene.add(new THREE.Points(fieldGeo, fieldMat));
 
     var mouse = { x: 0, y: 0 };
     window.addEventListener("pointermove", function (e) {
@@ -448,6 +507,7 @@
 
     var clock = new THREE.Clock();
     var pos = geo.attributes.position.array;
+    var normalRot = new THREE.Matrix3();
 
     function tick() {
       requestAnimationFrame(tick);
@@ -455,19 +515,6 @@
 
       var t = clock.getElapsedTime();
       var p = formation.p;
-
-      for (var i = 0; i < N; i++) {
-        var i3 = i * 3;
-        var local = (p - delays[i]) / 0.62;
-        local = local < 0 ? 0 : local > 1 ? 1 : local;
-        var e = easeOutCubic(local);
-        var w = 1 + Math.sin(t * 1.1 + phases[i]) * 0.014 * e;
-
-        pos[i3]     = starts[i3]     + (targets[i3]     * w - starts[i3])     * e;
-        pos[i3 + 1] = starts[i3 + 1] + (targets[i3 + 1] * w - starts[i3 + 1]) * e;
-        pos[i3 + 2] = starts[i3 + 2] + (targets[i3 + 2] * w - starts[i3 + 2]) * e;
-      }
-      geo.attributes.position.needsUpdate = true;
 
       group.rotation.y += 0.0014;
       points.rotation.y += (mouse.x * 0.3 - points.rotation.y) * 0.03;
@@ -477,7 +524,60 @@
       var gp = globeState.progress;
       group.scale.setScalar(1 + 1.6 * gp);
       group.position.x = globeState.heroX * (1 - gp);
+      guides.scale.copy(group.scale);
+      guides.position.copy(group.position);
       mat.opacity = 0.95 * (1 - 0.25 * gp);
+
+      // Rotation part of the points' world matrix, to light each dot
+      // in view space as the sphere turns
+      group.updateMatrixWorld(true);
+      normalRot.setFromMatrix4(points.matrixWorld);
+      var m = normalRot.elements;
+
+      for (var i = 0; i < N; i++) {
+        var i3 = i * 3;
+        var local = (p - delays[i]) / 0.62;
+        local = local < 0 ? 0 : local > 1 ? 1 : local;
+        var e = easeOutCubic(local);
+        var w = 1 + Math.sin(t * 1.1 + phases[i]) * 0.014 * e;
+
+        var ox = targets[i3], oy = targets[i3 + 1], oz = targets[i3 + 2];
+        var nx = m[0] * ox + m[3] * oy + m[6] * oz;
+        var ny = m[1] * ox + m[4] * oy + m[7] * oz;
+        var nz = m[2] * ox + m[5] * oy + m[8] * oz;
+        var nl = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+        nx /= nl; ny /= nl; nz /= nl;
+
+        var lit = nx * LIGHT.x + ny * LIGHT.y + nz * LIGHT.z;
+        lit = lit < 0 ? 0 : lit;
+        // Dither: dots survive in proportion to light. While scattered
+        // (e < 1) every dot stays so the formation reads as a swarm.
+        if (dither[i] > 0.28 + 0.72 * lit + (1 - e)) {
+          pos[i3 + 2] = -1000;   // past the far plane, so it is clipped
+          continue;
+        }
+
+        pos[i3]     = starts[i3]     + (ox * w - starts[i3])     * e;
+        pos[i3 + 1] = starts[i3 + 1] + (oy * w - starts[i3 + 1]) * e;
+        pos[i3 + 2] = starts[i3 + 2] + (oz * w - starts[i3 + 2]) * e;
+
+        var tone = (0.4 + 0.6 * lit) * (nz < 0 ? 0.45 : 1);
+        var c = accent[i] ? BRONZE : INK;
+        colors[i3]     = 1 - (1 - c[0]) * tone;
+        colors[i3 + 1] = 1 - (1 - c[1]) * tone;
+        colors[i3 + 2] = 1 - (1 - c[2]) * tone;
+      }
+      geo.attributes.position.needsUpdate = true;
+      geo.attributes.color.needsUpdate = true;
+
+      var draw = p < 0.35 ? 0 : (p - 0.35) / 0.65;
+      draw = draw > 1 ? 1 : draw;
+      for (var g = 0; g < guideLines.length; g++) {
+        guideLines[g].geo.setDrawRange(0, Math.ceil(guideLines[g].count * draw));
+      }
+      guideMat.opacity = 0.3 * draw * (1 - 0.6 * gp);
+      guideAccent.opacity = 0.8 * draw * (1 - 0.6 * gp);
+      fieldMat.opacity = 0.35 * p;
 
       renderer.render(scene, camera);
     }
