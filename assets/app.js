@@ -200,6 +200,9 @@ async function walletConnectProvider() {
   const wc = S.cfg.walletConnect;
   const chainId = Number(S.cfg.chainId);
   const origin = location.origin;
+  // Relative to the page, so the icon also resolves when the site is served
+  // from a sub path (for example GitHub Pages project sites).
+  const siteUrl = new URL(".", location.href).href.replace(/\/$/, "");
   const meta = wc.metadata || {};
   wcProvider = await mod.EthereumProvider.init({
     projectId: wc.projectId,
@@ -212,7 +215,7 @@ async function walletConnectProvider() {
       name: meta.name || "Loro",
       description: meta.description || "",
       url: origin,
-      icons: meta.icons && meta.icons.length ? meta.icons : [origin + "/assets/favicon.svg"]
+      icons: meta.icons && meta.icons.length ? meta.icons : [siteUrl + "/assets/favicon.svg"]
     }
   });
   wcProvider.on("disconnect", () => {

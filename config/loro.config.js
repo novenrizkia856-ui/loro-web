@@ -61,7 +61,7 @@ export const docsUrl = "";
    domains (e.g. your-site.vercel.app, localhost) to its allowlist there.
    Leave projectId empty to offer browser wallets only. */
 export const walletConnect = {
-  projectId: "",
+  projectId: "ff24e7c4e7d10744e3ccd080e4307cad",
   metadata: {
     name: "Loro",
     description: "Borrow without selling. Fixed rate, fixed term, fully onchain.",
