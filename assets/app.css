@@ -37,14 +37,14 @@ a.addrbar-value:hover { color: var(--accent); }
   transition: color 0.3s ease, background 0.3s ease;
 }
 .app-tab:hover { color: var(--ink); }
-.app-tab.is-on { color: var(--ink); background: rgba(11, 14, 17, 0.07); }
+.app-tab.is-on { color: var(--ink); background: rgba(237, 239, 241, 0.07); }
 .app-wallet { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .app-wallet.is-connected {
   background: transparent;
   color: var(--ink);
   border-color: var(--hairline);
 }
-.app-wallet.is-connected:hover { background: rgba(11, 14, 17, 0.05); }
+.app-wallet.is-connected:hover { background: rgba(237, 239, 241, 0.05); }
 .app-wallet.is-wrong {
   background: transparent;
   color: var(--accent);
@@ -140,7 +140,7 @@ a.addrbar-value:hover { color: var(--accent); }
 .app-card,
 .loan-card {
   position: relative;
-  background: rgba(244, 245, 246, 0.62);
+  background: rgba(20, 24, 29, 0.62);
   border: 1px solid var(--hairline-soft);
   padding: clamp(1.1rem, 1.8vw, 1.5rem);
 }
@@ -220,7 +220,7 @@ a.addrbar-value:hover { color: var(--accent); }
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
-.lc-track { display: block; height: 3px; margin-top: 0.7rem; background: rgba(11, 14, 17, 0.1); }
+.lc-track { display: block; height: 3px; margin-top: 0.7rem; background: rgba(237, 239, 241, 0.1); }
 .lc-track-fill { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.9s linear; }
 
 .lc-note { font-size: 0.8125rem; font-weight: 500; line-height: 1.55; color: var(--gray); }
@@ -241,7 +241,7 @@ a.addrbar-value:hover { color: var(--accent); }
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(11, 14, 17, 0.6);
   border: 1px solid var(--hairline);
   border-radius: 0;
   padding: 0.7rem 0.8rem;
@@ -269,7 +269,7 @@ a.addrbar-value:hover { color: var(--accent); }
   gap: 0.55rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--hairline-soft);
-  background: rgba(11, 14, 17, 0.02);
+  background: rgba(237, 239, 241, 0.02);
 }
 .app-summary:empty { display: none; }
 .app-summary div { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
@@ -293,9 +293,9 @@ a.addrbar-value:hover { color: var(--accent); }
   color: var(--ink);
   border: 1px solid var(--hairline);
   padding: 0;
-  box-shadow: 0 50px 120px -40px rgba(11, 14, 17, 0.25);
+  box-shadow: 0 50px 120px -40px rgba(0, 0, 0, 0.8);
 }
-.app-dialog::backdrop { background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(6px); }
+.app-dialog::backdrop { background: rgba(11, 14, 17, 0.72); backdrop-filter: blur(6px); }
 .app-dialog[open] { animation: app-rise 0.45s var(--ease) both; }
 .app-dialog-inner { display: flex; flex-direction: column; gap: 1rem; padding: clamp(1.3rem, 3vw, 1.9rem); }
 .app-dialog-title {
@@ -346,11 +346,11 @@ a.addrbar-value:hover { color: var(--accent); }
   width: min(24rem, calc(100vw - 1.5rem));
   display: flex; flex-direction: column; gap: 0.9rem;
   padding: 1.1rem 1.2rem;
-  background: rgba(244, 245, 246, 0.94);
+  background: rgba(20, 24, 29, 0.94);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border: 1px solid var(--hairline);
-  box-shadow: 0 40px 90px -40px rgba(11, 14, 17, 0.25);
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.8);
   animation: app-rise 0.45s var(--ease) both;
 }
 .app-tx-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
