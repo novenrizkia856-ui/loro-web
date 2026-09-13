@@ -56,13 +56,10 @@ export const networks = {
 export const defaultNetwork = "robinhood";
 export const docsUrl = "";
 
-/* The project token. A separate contract from LoroLoan and LoroLens, not
-   deployed yet. Its address is what the landing page's "Contract address"
-   bar shows; while null the bar reads "Coming soon". */
-export const token = {
-  address: null,
-  symbol: "LORO"
-};
+/* Project token contract address (CA), separate from LoroLoan and LoroLens.
+   Shown in the landing page's "Contract address" bar. null = "Coming soon".
+   At token launch, replace null with the address in quotes. */
+export const tokenAddress = null;
 
 /* WalletConnect (Reown). The project id is a public identifier, not a
    secret: create one at https://dashboard.reown.com and add the site's
@@ -102,7 +99,7 @@ export async function loadConfig() {
     } catch (e) { /* no local deployment synced yet */ }
   }
   net.docsUrl = docsUrl;
-  net.token = JSON.parse(JSON.stringify(token));
+  net.tokenAddress = tokenAddress;
   net.walletConnect = JSON.parse(JSON.stringify(walletConnect));
   net.deployed = Boolean(net.chainId && net.contracts.loroLoan && net.contracts.loroLens);
   return net;
