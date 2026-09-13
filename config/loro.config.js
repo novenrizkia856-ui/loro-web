@@ -56,6 +56,19 @@ export const networks = {
 export const defaultNetwork = "robinhood";
 export const docsUrl = "";
 
+/* WalletConnect (Reown). The project id is a public identifier, not a
+   secret: create one at https://dashboard.reown.com and add the site's
+   domains (e.g. your-site.vercel.app, localhost) to its allowlist there.
+   Leave projectId empty to offer browser wallets only. */
+export const walletConnect = {
+  projectId: "",
+  metadata: {
+    name: "Loro",
+    description: "Borrow without selling. Fixed rate, fixed term, fully onchain.",
+    icons: []   // absolute url(s) to a square icon; filled from the page origin if empty
+  }
+};
+
 function isLocalHost() {
   return typeof location !== "undefined" &&
     ["localhost", "127.0.0.1", "[::1]"].indexOf(location.hostname) !== -1;
@@ -81,6 +94,7 @@ export async function loadConfig() {
     } catch (e) { /* no local deployment synced yet */ }
   }
   net.docsUrl = docsUrl;
+  net.walletConnect = JSON.parse(JSON.stringify(walletConnect));
   net.deployed = Boolean(net.chainId && net.contracts.loroLoan && net.contracts.loroLens);
   return net;
 }

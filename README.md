@@ -21,7 +21,8 @@ assets/content.js          copy for the landing list sections
 assets/app.js              wallet, reads, transactions
 assets/loro-core.js        protocol math and units, no DOM, mirrors the contract
 assets/loro-abi.js         GENERATED ABIs from loro-contracts
-assets/vendor/             three.js, gsap, ScrollTrigger, ethers 6.15.0
+assets/vendor/             three.js, gsap, ScrollTrigger, ethers 6.15.0,
+                           WalletConnect provider 2.24.0 (single ESM bundle, lazy loaded)
 tests/                     node tests for loro-core, Solidity computed vectors
 tools/sync-contracts.mjs   copies ABIs, vectors and local addresses from loro-contracts
 tools/serve.mjs            dependency free static server for local development
@@ -32,8 +33,30 @@ vercel.json                static hosting config
 ## The app
 
 `app.html` connects any injected browser wallet (EIP 6963 discovery, with
-`window.ethereum` as fallback). Nothing is custodied and no key ever touches the
-page.
+`window.ethereum` as fallback) and, when a project id is configured, any mobile or
+desktop wallet through WalletConnect (QR code). Nothing is custodied and no key
+ever touches the page.
+
+WalletConnect details:
+
+- The provider bundle (2 MB) is fetched only when a visitor picks WalletConnect or
+  already has a WalletConnect session in that browser; everyone else never loads it.
+- Robinhood Chain is requested as an optional chain, so wallets that do not list it
+  yet can still connect; the app then asks the wallet to switch or add the chain.
+- Clicking the connected address opens a small menu with Disconnect, which also ends
+  the WalletConnect session in the wallet.
+- To rebuild the bundle for a newer version:
+
+  ```bash
+  npm i @walletconnect/ethereum-provider@<version> esbuild
+  echo 'export { EthereumProvider } from "@walletconnect/ethereum-provider";' > entry.js
+  npx esbuild entry.js --bundle --format=esm --platform=browser --target=es2020 --minify \
+    --define:process.env.NODE_ENV='"production"' --define:global=globalThis \
+    --outfile=assets/vendor/walletconnect-provider-<version>.js
+  ```
+
+  then update `WC_BUNDLE` in `assets/app.js`. Keep the version in the file name:
+  `vercel.json` caches `assets/vendor/` as immutable for a year.
 
 | Section | What a wallet can do |
 | --- | --- |
@@ -83,6 +106,8 @@ the codebase hardcodes an address, chain id or RPC url.
 | `contracts.loroLoan`, `contracts.loroLens` | deployment output |
 | `stablecoin.address` | optional; if set, it must equal `LoroLoan.stablecoin()` or the app stops |
 | `collateral[]` | assets offered as shortcuts in the offer form; ETH is `0x0000000000000000000000000000000000000000`. Decimals and symbols are always read from chain |
+| `walletConnect.projectId` | Reown (WalletConnect) project id from https://dashboard.reown.com. Public, not a secret. Empty disables WalletConnect. Add every domain that serves the site (the Vercel domain, custom domains, `localhost`) to the project's allowlist, or wallets will refuse to connect |
+| `walletConnect.metadata` | name, description and icon shown inside the wallet during connection |
 
 A network is treated as deployed only when `chainId`, `loroLoan` and `loroLens` are
 all set. Until then the landing page shows "Coming soon" and "Not deployed", and the

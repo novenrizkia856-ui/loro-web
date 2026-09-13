@@ -108,6 +108,13 @@ function explain(e) {
     return "You rejected the request in your wallet. Nothing was sent.";
   }
   if (code === -32002) return "Your wallet already has a request open. Open the wallet to continue.";
+  const text = String(e.message || "");
+  if (/connection request reset|modal closed|user closed|proposal expired/i.test(text)) {
+    return "The WalletConnect request was closed before a wallet approved it. Nothing was connected.";
+  }
+  if (/project id|projectid|unauthorized|origin not allowed|allowlist/i.test(text)) {
+    return "WalletConnect refused this site. Check walletConnect.projectId in config/loro.config.js and add this domain to the project's allowlist on dashboard.reown.com.";
+  }
   if (code === "INSUFFICIENT_FUNDS") return "Your wallet does not have enough ETH to pay for this transaction and its gas.";
   const name = errorName(e);
   if (name) return core.describeContractError(name) || "The contract rejected this with " + name + ".";
@@ -168,29 +175,99 @@ function injected() {
   return window.ethereum ? [{ name: "Browser wallet", provider: window.ethereum }] : [];
 }
 
-async function chooseWallet() {
-  const list = injected();
-  if (list.length <= 1) return list[0] ? list[0].provider : null;
+/* ---- WalletConnect ----
+   The 2 MB provider bundle is only fetched when someone picks WalletConnect
+   or already has a WalletConnect session stored in this browser. */
+const WC_BUNDLE = "./vendor/walletconnect-provider-2.24.0.js";
+let wcProvider = null;
+
+function walletConnectEnabled() {
+  return Boolean(S.cfg.walletConnect && S.cfg.walletConnect.projectId && S.cfg.chainId);
+}
+
+function hasStoredWalletConnectSession() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      if ((localStorage.key(i) || "").indexOf("wc@2") === 0) return true;
+    }
+  } catch (e) { /* storage blocked */ }
+  return false;
+}
+
+async function walletConnectProvider() {
+  if (wcProvider) return wcProvider;
+  const mod = await import(WC_BUNDLE);
+  const wc = S.cfg.walletConnect;
+  const chainId = Number(S.cfg.chainId);
+  const origin = location.origin;
+  const meta = wc.metadata || {};
+  wcProvider = await mod.EthereumProvider.init({
+    projectId: wc.projectId,
+    // Optional rather than required: wallets that do not list Robinhood Chain
+    // yet can still connect, and are then asked to add or switch to it.
+    optionalChains: [chainId],
+    rpcMap: S.cfg.rpcUrl ? { [chainId]: S.cfg.rpcUrl } : {},
+    showQrModal: true,
+    metadata: {
+      name: meta.name || "Loro",
+      description: meta.description || "",
+      url: origin,
+      icons: meta.icons && meta.icons.length ? meta.icons : [origin + "/assets/favicon.svg"]
+    }
+  });
+  wcProvider.on("disconnect", () => {
+    if (S.eip1193 === wcProvider) resetWallet();
+  });
+  return wcProvider;
+}
+
+function walletOptions() {
+  const list = injected().map((w) => ({ name: w.name, kind: "injected", provider: w.provider }));
+  if (walletConnectEnabled()) {
+    list.push({ name: "WalletConnect", kind: "walletconnect", detail: "Scan a QR code with a mobile wallet" });
+  }
+  return list;
+}
+
+/* Generic chooser built on the review dialog. Resolves the picked option or null. */
+function pickDialog(opts) {
   return new Promise((resolve) => {
     const dialog = $("#confirm");
-    $("#confirmEyebrow").textContent = "Wallet";
-    $("#confirmTitle").textContent = "Choose a wallet";
-    $("#confirmRows").innerHTML = "";
-    $("#confirmNote").textContent = "Loro never sees your keys. Your wallet signs every transaction.";
+    $("#confirmEyebrow").textContent = opts.eyebrow || "Wallet";
+    $("#confirmTitle").textContent = opts.title;
+    const rows = $("#confirmRows");
+    rows.innerHTML = "";
+    (opts.rows || []).forEach((r) => {
+      const div = document.createElement("div");
+      const dt = document.createElement("dt");
+      dt.textContent = r[0];
+      const dd = document.createElement("dd");
+      dd.textContent = r[1];
+      div.appendChild(dt);
+      div.appendChild(dd);
+      rows.appendChild(div);
+    });
+    $("#confirmNote").textContent = opts.note || "";
     const steps = $("#confirmSteps");
     steps.innerHTML = "";
     $("#confirmOk").hidden = true;
     let picked = null;
-    list.forEach((w) => {
+    opts.options.forEach((o) => {
       const li = document.createElement("li");
       const b = document.createElement("button");
       b.type = "button";
       b.className = "btn btn-ghost app-sm";
-      b.textContent = w.name;
-      b.addEventListener("click", () => { picked = w.provider; dialog.close("ok"); });
+      b.textContent = o.name;
+      b.addEventListener("click", () => { picked = o; dialog.close("ok"); });
       li.appendChild(b);
+      if (o.detail) {
+        const small = document.createElement("small");
+        small.textContent = o.detail;
+        li.appendChild(small);
+      }
       steps.appendChild(li);
     });
+    dialog.returnValue = "";
     dialog.addEventListener("close", function onClose() {
       dialog.removeEventListener("close", onClose);
       $("#confirmOk").hidden = false;
@@ -200,14 +277,36 @@ async function chooseWallet() {
   });
 }
 
+async function chooseWallet() {
+  const list = walletOptions();
+  if (list.length <= 1) return list[0] || null;
+  return pickDialog({
+    title: "Choose a wallet",
+    note: "Loro never sees your keys. Your wallet signs every transaction.",
+    options: list
+  });
+}
+
 async function connect() {
-  const provider = await chooseWallet();
-  if (!provider) {
-    notice("No browser wallet found. Install a wallet such as MetaMask or Rabby, then reload this page.");
+  const choice = await chooseWallet();
+  if (!choice) {
+    if (!walletOptions().length) {
+      notice("No browser wallet found. Install a wallet such as MetaMask or Rabby, then reload this page.");
+    }
     return false;
   }
   try {
-    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    let provider;
+    let accounts;
+    if (choice.kind === "walletconnect") {
+      provider = await walletConnectProvider();
+      if (!provider.session) await provider.connect();
+      accounts = provider.accounts;
+    } else {
+      provider = choice.provider;
+      accounts = await provider.request({ method: "eth_requestAccounts" });
+    }
+    S.walletName = choice.name;
     await attach(provider, accounts);
     return Boolean(S.account);
   } catch (e) {
@@ -216,7 +315,52 @@ async function connect() {
   }
 }
 
+async function walletMenu() {
+  const picked = await pickDialog({
+    title: core.shortAddress(S.account),
+    rows: [["Address", S.account], ["Connected with", S.walletName || "Browser wallet"], ["Network", S.cfg.name]],
+    note: S.walletName === "WalletConnect"
+      ? "Disconnecting ends the WalletConnect session on this device and in your wallet."
+      : "Browser wallets stay authorized for this site until you remove it in the wallet itself.",
+    options: [
+      { name: "Refresh", kind: "refresh" },
+      { name: "Disconnect", kind: "disconnect" }
+    ]
+  });
+  if (!picked) return;
+  if (picked.kind === "refresh") return refresh();
+  if (S.eip1193 === wcProvider && wcProvider) {
+    try { await wcProvider.disconnect(); } catch (e) { /* already gone */ }
+  }
+  resetWallet();
+}
+
+function detachListeners(provider) {
+  if (provider && provider.removeListener) {
+    provider.removeListener("accountsChanged", onAccounts);
+    provider.removeListener("chainChanged", onChain);
+  }
+}
+
+function resetWallet() {
+  detachListeners(S.eip1193);
+  S.eip1193 = null;
+  S.wallet = null;
+  S.signer = null;
+  S.account = null;
+  S.chainId = null;
+  S.walletName = null;
+  S.signature = null;
+  S.lists.lender = [];
+  S.lists.borrower = [];
+  updateWalletUi();
+  notice(null);
+  renderAll();
+  refresh(true);
+}
+
 function onAccounts(accounts) {
+  if (!accounts || !accounts.length) return resetWallet();
   attach(S.eip1193, accounts);
 }
 function onChain() {
@@ -224,10 +368,7 @@ function onChain() {
 }
 
 async function attach(provider, accounts) {
-  if (S.eip1193 && S.eip1193 !== provider && S.eip1193.removeListener) {
-    S.eip1193.removeListener("accountsChanged", onAccounts);
-    S.eip1193.removeListener("chainChanged", onChain);
-  }
+  if (S.eip1193 && S.eip1193 !== provider) detachListeners(S.eip1193);
   if (S.eip1193 !== provider && provider.on) {
     provider.on("accountsChanged", onAccounts);
     provider.on("chainChanged", onChain);
@@ -245,11 +386,24 @@ async function attach(provider, accounts) {
 
 async function reconnectSilently() {
   await new Promise((r) => setTimeout(r, 60)); // let wallets announce
+  if (walletConnectEnabled() && hasStoredWalletConnectSession()) {
+    try {
+      const provider = await walletConnectProvider();
+      if (provider.session && provider.accounts && provider.accounts.length) {
+        S.walletName = "WalletConnect";
+        await attach(provider, provider.accounts);
+        return;
+      }
+    } catch (e) { /* fall back to browser wallets */ }
+  }
   const list = injected();
   if (!list.length) return;
   try {
     const accounts = await list[0].provider.request({ method: "eth_accounts" });
-    if (accounts && accounts.length) await attach(list[0].provider, accounts);
+    if (accounts && accounts.length) {
+      S.walletName = list[0].name;
+      await attach(list[0].provider, accounts);
+    }
   } catch (e) { /* stay disconnected */ }
 }
 
@@ -1076,7 +1230,7 @@ function wire() {
       try { await switchNetwork(); } catch (e) { notice(explain(e)); }
       return;
     }
-    refresh();
+    walletMenu();
   });
   $$("[data-refresh]").forEach((b) => b.addEventListener("click", () => refresh()));
   $("#txClose").addEventListener("click", () => { $("#tx").hidden = true; });
