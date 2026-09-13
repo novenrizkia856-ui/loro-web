@@ -1,0 +1,182 @@
+# Loro web
+
+Static landing page and app for Loro, a permissionless, fixed rate, fixed term,
+isolated lending protocol. Lock a Stock Token or ETH, borrow stablecoin at a rate
+and term fixed on day one. Repay by the deadline, or the collateral is auctioned.
+
+No build step. No server. No API routes. No backend. Plain HTML, CSS and
+JavaScript. The chain is the source of truth.
+
+## Layout
+
+```
+index.html                 landing page
+app.html                   the app: borrow, lend, my loans, auctions
+config/loro.config.js      networks, addresses, assets  (the only place these live)
+config/loro.local.js       GENERATED Anvil addresses, localhost only, not deployed
+assets/styles.css          design system and every landing component
+assets/app.css             app components, built only from styles.css tokens
+assets/script.js           landing content binding, config binding, motion
+assets/content.js          copy for the landing list sections
+assets/app.js              wallet, reads, transactions
+assets/loro-core.js        protocol math and units, no DOM, mirrors the contract
+assets/loro-abi.js         GENERATED ABIs from loro-contracts
+assets/vendor/             three.js, gsap, ScrollTrigger, ethers 6.15.0
+tests/                     node tests for loro-core, Solidity computed vectors
+tools/sync-contracts.mjs   copies ABIs, vectors and local addresses from loro-contracts
+tools/serve.mjs            dependency free static server for local development
+vercel.json                static hosting config
+.vercelignore              keeps tools, tests and local config out of the deploy
+```
+
+## The app
+
+`app.html` connects any injected browser wallet (EIP 6963 discovery, with
+`window.ethereum` as fallback). Nothing is custodied and no key ever touches the
+page.
+
+| Section | What a wallet can do |
+| --- | --- |
+| Borrow | browse open offers, inspect terms, accept (approve collateral, then accept; ETH is sent with the call) |
+| Lend | create an offer (approve principal, then create), see own offers and loans, cancel an open offer, open an auction, claim collateral after an unfilled auction, withdraw proceeds |
+| My loans | see active loans with a live deadline countdown, repay (approve, then repay) |
+| Auctions | see loans past their deadline and open auctions, open an auction, watch the live price, fill |
+
+Every transaction is shown in a review dialog before any wallet prompt: what it
+does, which asset and how much is sent or received, and which contract function is
+called. Approvals are for the exact amount only. Progress is shown per step, and
+failures are explained in plain language: rejected in wallet, insufficient balance
+(checked before prompting), missing allowance (added as a step), wrong network
+(offers to switch), and every LoroLoan custom error.
+
+Reads go through `LoroLens` using the connected wallet, or the optional public
+`rpcUrl` in config before a wallet connects. Action buttons follow the same time
+rules as the contract (repay while `now <= maturity`, fill while
+`now <= auctionEnd`, and so on), evaluated against chain time every second.
+
+### Auction price
+
+The live price is computed locally in `assets/loro-core.js` with BigInt, using
+exactly the contract formula and rounding (up):
+
+```
+price = floor + ceil((ceiling - floor) * (window - elapsed) / window), floor once elapsed >= window
+```
+
+`tests/auction-vectors.json` holds 160 prices computed by `LoroLoan.auctionPriceAt`
+itself, including `uint256` extremes, and the test suite requires a bit for bit
+match. The contract stays the authority; the page only estimates, and the buyer
+always pays the price of the block that includes the transaction, which can only be
+lower.
+
+## Configuration
+
+Everything deployment related lives in `config/loro.config.js`. Nothing else in
+the codebase hardcodes an address, chain id or RPC url.
+
+| Field | Meaning |
+| --- | --- |
+| `name` | network name shown in the app and footer |
+| `chainId` | chain id; the app refuses to transact on any other |
+| `rpcUrl` | optional public RPC for reads before a wallet connects. Never a private key or paid endpoint secret |
+| `explorerUrl` | explorer base url for address and transaction links |
+| `contracts.loroLoan`, `contracts.loroLens` | deployment output |
+| `stablecoin.address` | optional; if set, it must equal `LoroLoan.stablecoin()` or the app stops |
+| `collateral[]` | assets offered as shortcuts in the offer form; ETH is `0x0000000000000000000000000000000000000000`. Decimals and symbols are always read from chain |
+
+A network is treated as deployed only when `chainId`, `loroLoan` and `loroLens` are
+all set. Until then the landing page shows "Coming soon" and "Not deployed", and the
+app shows its empty state. Never fill in an address that did not come from the
+actual deployment or an official token list.
+
+`?network=<key>` selects a network explicitly. On `localhost` the `local` profile is
+the default; it can never be selected from a public host.
+
+## Running locally against Anvil
+
+```bash
+# terminal 1
+anvil
+
+# terminal 2, in loro-contracts
+forge build
+A=($(cast rpc eth_accounts | tr -d '[]"' | tr ',' ' '))
+LOCAL_ACTORS="${A[1]},${A[2]},${A[3]},${A[4]}" LOCAL_TREASURY="${A[9]}" \
+  forge script script/DeployLocal.s.sol --rpc-url http://127.0.0.1:8545 --unlocked --sender "${A[0]}" --broadcast
+
+# terminal 2, in loro-web
+node tools/sync-contracts.mjs ../loro-contracts --local
+node tools/serve.mjs 5199
+```
+
+Open http://localhost:5199/app. Import one of Anvil's default development accounts
+into a browser wallet, add the network `http://127.0.0.1:8545` with chain id 31337,
+and the funded mock tokens (mUSD, mSTKA, mSTKB) are ready to use. Those keys are
+public test keys; never use them anywhere else.
+
+## Tests
+
+```bash
+node --test tests/loro-core.test.mjs
+```
+
+Checks the auction price against the Solidity vectors, monotonicity and bounds over
+random inputs, fee rounding, time flags, strict unit parsing, and that the ABI
+exposes every function the app calls with a message for every contract error.
+
+After changing the contracts, regenerate everything the site consumes:
+
+```bash
+# in loro-contracts
+forge build && forge test --match-test test_exportAuctionVectors
+# in loro-web
+node tools/sync-contracts.mjs ../loro-contracts
+node --test tests/loro-core.test.mjs
+```
+
+## Deploying
+
+Vercel, default settings, framework preset Other. Build command: none. Output
+directory: the repository root. `.vercelignore` keeps `tools/`, `tests/` and the
+generated local config out of the upload.
+
+```bash
+npx vercel deploy --prod
+```
+
+## House rules for copy
+
+No hyphens, en dashes, or em dashes anywhere a visitor can read them. This
+covers headings, body copy, button labels, tooltips, alt text, the page title,
+and the meta description. Use two words ("fixed term"), one merged word
+("onchain"), or a rewrite.
+
+Dashes in code, class names, file names, and URLs are fine and often required.
+
+## Metric numbers and the interface mock
+
+Both live in the light section of the landing page.
+
+The four metrics render from `home.metrics` in `assets/content.js`. Shape is
+`{ prefix, value, suffix, label }`. A numeric `value` above zero counts up on
+scroll; anything else is printed as written. They read zero because those four are
+structural facts of the protocol rather than traction figures.
+
+The interface mock is a borrower dashboard shown inside a laptop frame. All of
+it is HTML and CSS, not a screenshot. It carries a "Preview" tag and a caption
+saying the values are an example. The figures are internally consistent, so change
+them together.
+
+## Notes on the design
+
+- Type is Fraunces for display, Schibsted Grotesk for interface and body, and
+  JetBrains Mono for real values, set once as `--serif`, `--sans` and `--mono` at
+  the top of `styles.css`.
+- Palette is six named colours defined once at the top of `styles.css`. The app
+  adds no colours of its own.
+- Monospace is reserved for real values: addresses, amounts, step numerals.
+- `assets/logo.svg` and `assets/favicon.svg` carry the two brand colours as literal
+  hex, because an `<img>` cannot read CSS variables.
+- The landing motion system is unchanged: preloader, particle field, pinned cards,
+  word by word reveal, clip path reveals. The app uses short entrance transitions
+  only. Everything respects `prefers-reduced-motion`.

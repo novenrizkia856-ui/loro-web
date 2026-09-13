@@ -1,0 +1,5 @@
+# Development only. The deployed site is plain static files.
+tools/
+tests/
+.claude/
+config/loro.local.js

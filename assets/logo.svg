@@ -1,0 +1,5 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Loro">
+  <path d="M9 5.5V26.5" stroke="#EDEFF1" stroke-width="2.1" stroke-linecap="square"/>
+  <path d="M9 26.5H23.5" stroke="#C9A97E" stroke-width="2.1" stroke-linecap="square"/>
+  <rect x="8.2" y="15.1" width="1.8" height="1.8" fill="#C9A97E"/>
+</svg>

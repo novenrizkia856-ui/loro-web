@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loro: Borrow without selling</title>
+  <meta name="description" content="Loro is a permissionless lending protocol. Lock a Stock Token or ETH and borrow stablecoin at a rate and term fixed on day one.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <!-- Fonts: Fraunces (display), Schibsted Grotesk (UI), JetBrains Mono (values) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400..700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <!-- Film grain overlay -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Preloader -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader-inner">
+      <img src="assets/logo.svg" alt="" class="preloader-logo">
+      <span class="preloader-word">Loro</span>
+      <span class="mono preloader-tick" id="preloaderTick">00</span>
+    </div>
+  </div>
+
+  <!-- Particle field (fixed, behind everything dark) -->
+  <canvas id="globe" aria-hidden="true"></canvas>
+
+  <!-- Top: contract address bar + navbar -->
+  <div class="top" id="top">
+
+    <!-- Contract address bar. Every value shown here comes from
+         config/loro.config.js. An empty config renders the empty state. -->
+    <div class="addrbar" id="addrBar">
+      <div class="addrbar-inner">
+        <span class="addrbar-label">Contract address</span>
+        <span class="mono addrbar-value" id="addrValue">Coming soon</span>
+        <button class="addrbar-copy" id="addrCopy" type="button" disabled
+                aria-label="Copy contract address" title="Not deployed yet.">
+          <svg class="addrbar-ico" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <rect x="5.75" y="5.75" width="7.5" height="7.5" rx="1"></rect>
+            <path d="M10.25 3.4V2.75a1 1 0 0 0-1-1h-6.5a1 1 0 0 0-1 1v6.5a1 1 0 0 0 1 1h0.65"></path>
+          </svg>
+          <span class="addrbar-copy-text" id="addrCopyText">Copy</span>
+        </button>
+      </div>
+    </div>
+
+    <header class="nav" id="nav">
+      <a class="brand" href="#home" aria-label="Loro, back to top">
+        <img src="assets/logo.svg" alt="" class="brand-mark">
+        <span class="brand-word">Loro</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary">
+        <a class="nav-link" href="#how"><span class="tick"></span>How it works</a>
+        <a class="nav-link" href="#why"><span class="tick"></span>Why Loro</a>
+        <a class="nav-link" href="#loan"><span class="tick"></span>The loan</a>
+      </nav>
+
+      <div class="nav-cta">
+        <a class="btn btn-ghost nav-docs" data-docs-link href="#">Read the docs</a>
+        <a class="btn btn-accent" href="app">Open app</a>
+        <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </div>
+    </header>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="m-menu" id="mMenu" aria-hidden="true">
+    <nav class="m-links" aria-label="Primary, mobile">
+      <a href="#how">How it works</a>
+      <a href="#why">Why Loro</a>
+      <a href="#loan">The loan</a>
+      <a href="app">Open app</a>
+      <a class="btn btn-accent m-cta" data-docs-link href="#">Read the docs</a>
+    </nav>
+  </div>
+
+  <main>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="home">
+      <div class="hero-inner">
+
+        <div class="hero-left">
+          <div class="rule rule-hero" aria-hidden="true"></div>
+
+          <h1 class="hero-title">
+            <span class="line"><span class="line-inner">Borrow without</span></span>
+            <span class="line"><span class="line-inner"><em>selling.</em></span></span>
+          </h1>
+
+          <div class="hero-bottom">
+            <p class="hero-sub">Fixed rate. Fixed term. Fully onchain.</p>
+            <div class="hero-ctas">
+              <a class="btn btn-accent" href="app">Open the app</a>
+              <a class="link-ghost" href="#how">See how it works</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="scroll-cue" aria-hidden="true">
+        <span>Scroll</span>
+        <span class="cue-line"></span>
+      </div>
+    </section>
+
+    <!-- ============ THE PROBLEM (sticky, particles expand behind) ============ -->
+    <section class="products-zone" id="problem">
+      <div class="products-pin">
+        <div class="products-grid">
+
+          <div class="products-left">
+            <div class="rule" aria-hidden="true"></div>
+            <p class="eyebrow"><span class="sq"></span><span>The problem</span></p>
+            <h2 class="products-title">Two ways to raise cash.<br><em>Both cost you.</em></h2>
+            <p class="products-sub">Loro needs neither.</p>
+          </div>
+
+          <div class="cards">
+            <article class="card">
+              <div class="rule" aria-hidden="true"></div>
+              <p class="mono card-label">01</p>
+              <h3 class="card-title">Sell the <em>asset</em></h3>
+              <p class="card-sub">You raise cash. You give up the position.</p>
+              <div class="card-visual visual-sell" aria-hidden="true"></div>
+              <p class="card-copy">Every gain after the sale belongs to someone else. Buying back in costs whatever the market asks that day.</p>
+              <ul class="card-meta" data-render-meta="problem.sellMeta"></ul>
+            </article>
+
+            <article class="card">
+              <div class="rule" aria-hidden="true"></div>
+              <p class="mono card-label">02</p>
+              <h3 class="card-title">Borrow <em>offchain</em></h3>
+              <p class="card-sub">You keep the asset. You give up your privacy.</p>
+              <div class="card-visual visual-offchain" aria-hidden="true"></div>
+              <p class="card-copy">Paperwork, identity checks, and a desk that decides whether you qualify. The terms can move after you sign.</p>
+              <ul class="card-meta" data-render-meta="problem.offchainMeta"></ul>
+            </article>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WHAT IT IS (light, overlaps from bottom) ============ -->
+    <section class="about" id="loan">
+      <div class="about-inner">
+
+        <div class="about-grid">
+          <div class="about-side">
+            <div class="rule rule-dark" aria-hidden="true"></div>
+            <p class="eyebrow eyebrow-dark"><span class="sq"></span><span>What Loro is</span></p>
+          </div>
+          <div class="about-main">
+            <div class="rule rule-dark" aria-hidden="true"></div>
+            <p class="about-big" id="aboutBig">Loro is a lending protocol. You lock a Stock Token or ETH. You borrow stablecoin against it. <em>The rate and the term are set on day one. Neither one moves.</em> No one approves you first. No one can change the terms later. Repay by the deadline and the collateral is yours again. Miss the deadline and it goes to auction. <em>That is the whole protocol.</em></p>
+          </div>
+        </div>
+
+        <!-- Metric numbers. Rendered from content.js so real figures
+             can replace them without touching the markup. -->
+        <div class="metrics-head">
+          <p class="eyebrow eyebrow-dark"><span class="sq"></span><span>By design</span></p>
+          <p class="metrics-line">Four numbers that never move.</p>
+        </div>
+        <div class="metrics" data-render-metrics="home.metrics"></div>
+
+        <!-- Loan timeline. Revealed by the clip path animation. -->
+        <div class="platform">
+          <p class="eyebrow eyebrow-dark"><span class="sq"></span><span>The life of a loan</span></p>
+          <div class="platform-frame reveal-frame">
+            <div class="loan frame-inner">
+              <ol class="loan-steps">
+                <li class="loan-step">
+                  <span class="loan-dot" aria-hidden="true"></span>
+                  <span class="mono loan-when">Day 0</span>
+                  <span class="loan-what">Collateral locked. Stablecoin out.</span>
+                </li>
+                <li class="loan-step">
+                  <span class="loan-dot" aria-hidden="true"></span>
+                  <span class="mono loan-when">Every day after</span>
+                  <span class="loan-what">The rate holds. The deadline holds.</span>
+                </li>
+                <li class="loan-step loan-step--fork">
+                  <span class="loan-dot loan-dot--end" aria-hidden="true"></span>
+                  <span class="mono loan-when">Deadline</span>
+                  <span class="loan-what">Repaid. The collateral comes back.</span>
+                  <span class="loan-what loan-what--alt">Not repaid. The collateral is auctioned.</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interface mock, shown in a device. The screen carries the
+             same clip path reveal as the timeline frame. -->
+        <div class="platform">
+          <p class="eyebrow eyebrow-dark"><span class="sq"></span><span>The interface</span></p>
+
+          <div class="device-wrap">
+            <div class="device">
+              <div class="device-screen reveal-frame">
+                <div class="mock frame-inner">
+
+                  <div class="mock-chrome">
+                    <span class="mock-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span class="mock-url">
+                      <svg class="mock-lock" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+                        <rect x="2.6" y="5.4" width="6.8" height="5" rx="0.9"></rect>
+                        <path d="M4.1 5.4V4a1.9 1.9 0 0 1 3.8 0v1.4"></path>
+                      </svg>
+                      Loro
+                    </span>
+                    <span class="mock-tag">Preview</span>
+                  </div>
+
+                  <div class="mock-app">
+
+                    <aside class="mock-side">
+                      <span class="mock-brand">
+                        <img src="assets/logo.svg" alt="" class="mock-mark">
+                        <span>Loro</span>
+                      </span>
+                      <nav class="mock-nav">
+                        <span class="mock-nav-item is-on">Overview</span>
+                        <span class="mock-nav-item">Borrow</span>
+                        <span class="mock-nav-item">My loans</span>
+                        <span class="mock-nav-item">Auctions</span>
+                      </nav>
+                      <span class="mock-nav-item mock-nav-last">Settings</span>
+                    </aside>
+
+                    <div class="mock-main">
+
+                      <div class="mock-head">
+                        <span class="mock-h">Welcome back</span>
+                        <span class="mock-wallet">Connect wallet</span>
+                      </div>
+
+                      <div class="mock-alert">
+                        <span class="mock-alert-dot" aria-hidden="true"></span>
+                        <span class="mock-alert-copy">Your loan reaches its deadline in 62 days. Repay before then to keep the collateral.</span>
+                        <span class="mock-alert-btn">Open loan</span>
+                      </div>
+
+                      <div class="mock-tabs">
+                        <span class="mock-tab is-on">Borrower</span>
+                        <span class="mock-tab">Lender</span>
+                      </div>
+
+                      <div class="mock-tiles">
+                        <div class="mock-tile">
+                          <span class="mock-tile-label">Collateral locked</span>
+                          <span class="mock-tile-num">1.00 ETH</span>
+                          <span class="mock-tile-sub">Across your open loans</span>
+                        </div>
+                        <div class="mock-tile">
+                          <span class="mock-tile-label">Fixed rate</span>
+                          <span class="mock-tile-num">7.50%</span>
+                          <span class="mock-tile-sub">Set on day one</span>
+                        </div>
+                        <div class="mock-tile">
+                          <span class="mock-tile-label">Open loans</span>
+                          <span class="mock-tile-num">1</span>
+                          <span class="mock-tile-sub">Nothing to renegotiate</span>
+                        </div>
+                      </div>
+
+                      <span class="mock-sec">Your loan</span>
+
+                      <div class="mock-card">
+                        <div class="mock-card-head">
+                          <span class="mock-card-mark"><img src="assets/logo.svg" alt=""></span>
+                          <span class="mock-card-copy">
+                            <span class="mock-card-title">ETH collateral loan</span>
+                            <span class="mock-card-meta">90 day term. Opened 15 Aug 2026.</span>
+                          </span>
+                          <span class="mock-badge">Open</span>
+                        </div>
+
+                        <div class="mock-card-grid">
+                          <span class="mock-kv"><span class="mock-kv-k">Borrowed</span><span class="mock-kv-v">1,200.00 USDC</span></span>
+                          <span class="mock-kv"><span class="mock-kv-k">Fixed rate</span><span class="mock-kv-v">7.50%</span></span>
+                          <span class="mock-kv"><span class="mock-kv-k">Total due</span><span class="mock-kv-v">1,222.19 USDC</span></span>
+                          <span class="mock-kv"><span class="mock-kv-k">Repay by</span><span class="mock-kv-v">13 Nov 2026</span></span>
+                        </div>
+
+                        <div class="mock-progress">
+                          <span class="mock-progress-head">
+                            <span class="mock-kv-k">Term elapsed</span>
+                            <span class="mock-kv-v">31%</span>
+                          </span>
+                          <span class="mock-track" aria-hidden="true"><span class="mock-track-fill"></span></span>
+                        </div>
+
+                        <span class="mock-btn">Repay 1,222.19 USDC</span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="device-foot" aria-hidden="true"><span class="device-notch"></span></div>
+          </div>
+
+          <p class="platform-note">Interface preview. The values shown are an example, not live data.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ PROPERTY TICKER ============ -->
+    <div class="marquee" aria-label="What the protocol fixes and what it leaves out">
+      <div class="marquee-track" data-render-partners="global.ticker"></div>
+    </div>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="section" id="how">
+      <div class="section-grid">
+        <div class="section-side">
+          <div class="rule" aria-hidden="true"></div>
+          <p class="eyebrow"><span class="sq"></span><span>How it works</span></p>
+        </div>
+        <div class="section-main">
+          <div class="rule" aria-hidden="true"></div>
+          <h2 class="section-title">Three steps, <em>then it is done</em></h2>
+          <p class="section-copy">Nothing in between needs your attention.</p>
+          <div class="blocks" data-render-blocks="home.steps"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WHY IT IS DIFFERENT ============ -->
+    <section class="section" id="why">
+      <div class="section-grid">
+        <div class="section-side">
+          <div class="rule" aria-hidden="true"></div>
+          <p class="eyebrow"><span class="sq"></span><span>Why Loro</span></p>
+        </div>
+        <div class="section-main">
+          <div class="rule" aria-hidden="true"></div>
+          <h2 class="section-title">Nothing left to <em>trust</em></h2>
+          <p class="section-copy">The rules live in the contract, and the contract cannot be edited.</p>
+          <div class="blocks" data-render-blocks="home.why"></div>
+          <p class="note mono reveal" id="statusNote">Contracts are not deployed yet. Nothing on this page is live.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="cta-band">
+      <h2 class="cta-band-title">Nothing to <em>sign up for.</em></h2>
+      <p class="cta-band-sub">The contracts are the product.</p>
+      <a class="btn btn-accent" href="app">Open the app</a>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="site-footer">
+      <div class="footer-head">
+        <h2 class="footer-title">Fixed rate.<br><em>Fixed term.</em></h2>
+      </div>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="#home">
+            <img src="assets/logo.svg" alt="" class="brand-mark">
+            <span class="brand-word">Loro</span>
+          </a>
+          <p class="footer-blurb">Loro is a set of contracts, not a company.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Protocol</h4>
+          <ul>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#why">Why Loro</a></li>
+            <li><a href="#loan">The loan</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Network</h4>
+          <ul>
+            <li><span class="footer-fact" id="footNetwork">Robinhood Chain</span></li>
+            <li><span class="footer-fact" id="footToken">Stablecoin loans</span></li>
+            <li><span class="footer-fact" id="footStatus">Not deployed</span></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="app">App</a></li>
+            <li><a data-docs-link href="#">Documentation</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-base">
+        <p class="mono">© 2026 Loro</p>
+        <p class="mono">Permissionless. Overcollateralized. Fixed term.</p>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Libraries -->
+  <script src="assets/vendor/three.min.js"></script>
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script src="assets/vendor/ScrollTrigger.min.js"></script>
+  <script src="assets/content.js"></script>
+  <script src="assets/script.js"></script>
+
+  <!-- Deployment values. The only place addresses live. -->
+  <script type="module">
+    import { loadConfig } from "./config/loro.config.js";
+    loadConfig().then(window.Loro.applyConfig);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Generated local Anvil addresses (node tools/sync-contracts.mjs --local)
+config/loro.local.js
+
+node_modules/
+.vercel/
+.DS_Store
