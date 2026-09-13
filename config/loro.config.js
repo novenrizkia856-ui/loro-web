@@ -16,9 +16,9 @@ export const networks = {
   robinhood: {
     key: "robinhood",
     name: "Robinhood Chain",
-    chainId: null,        // from the official Robinhood Chain docs
-    rpcUrl: "",           // public RPC for reads before a wallet connects (optional, no secrets)
-    explorerUrl: "",      // block explorer base url, no trailing slash
+    chainId: 4663,        // verified against the RPC endpoint
+    rpcUrl: "https://rpc.mainnet.chain.robinhood.com", // public RPC for reads, no secrets
+    explorerUrl: "https://robinhoodchain.blockscout.com", // no trailing slash
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     contracts: {
       loroLoan: null,     // from `forge script script/Deploy.s.sol` output
@@ -27,7 +27,8 @@ export const networks = {
     // The principal stablecoin is fixed per LoroLoan deployment. The app
     // reads the real address from LoroLoan.stablecoin() and refuses to run
     // if this value is set and disagrees.
-    stablecoin: { address: null, symbol: "", decimals: null },
+    // USDG checked onchain (symbol USDG, 6 decimals). Confirm on the Paxos list.
+    stablecoin: { address: "0x5fc5360d0400a0fd4f2af552add042d716f1d168", symbol: "USDG", decimals: 6 },
     // Collateral shortcuts shown in the offer form. Any standard ERC20 can
     // still be entered by address. Add Stock Tokens only from verified,
     // official token addresses.
