@@ -2,10 +2,9 @@
    LORO — landing page behaviour. No dependencies.
    - Deployment config binding (config/loro.config.js)
    - Header scroll state, mobile sheet
-   - Hero entrance + pointer parallax
+   - Hero entrance + pointer parallax on the product fragments
    - Pill marquee from content.js
    - Sticky word reveal
-   - In view reveals for step and feature visuals
    ============================================================ */
 
 (function () {
@@ -60,9 +59,10 @@
   }
 
   /* cfg is the resolved network from loadConfig() in
-     config/loro.config.js: { name, tokenAddress, docsUrl, deployed }.
-     The contract address pill belongs to the project token, which is a
-     separate contract from LoroLoan; it stays "Coming soon" until set. */
+     config/loro.config.js: { name, tokenAddress, docsUrl, deployed,
+     explorerUrl, contracts }. The contract address pill belongs to the
+     project token, a separate contract from LoroLoan; it stays
+     "Coming soon" until set. */
   function applyConfig(cfg) {
     cfg = cfg || {};
     var address = cfg.tokenAddress || "";
@@ -115,6 +115,24 @@
         btn.setAttribute("title", "Not deployed yet.");
       }
     }
+
+    /* ---- LoroLoan contract, linked to the explorer ---- */
+    var loan = cfg.contracts && cfg.contracts.loroLoan;
+    $$("[data-contract-addr]").forEach(function (el) {
+      el.textContent = loan ? truncateAddress(loan) : "Not deployed";
+      if (loan) el.setAttribute("title", loan);
+    });
+    $$("[data-contract-link]").forEach(function (el) {
+      if (loan && cfg.explorerUrl) {
+        el.setAttribute("href", cfg.explorerUrl + "/address/" + loan);
+        el.setAttribute("target", "_blank");
+        el.setAttribute("rel", "noopener");
+        el.removeAttribute("aria-disabled");
+      } else {
+        el.removeAttribute("href");
+        el.setAttribute("aria-disabled", "true");
+      }
+    });
 
     /* ---- Documentation links ---- */
     $$("[data-docs-link]").forEach(function (el) {
@@ -196,13 +214,11 @@
   var hero = $("#home");
   if (hero) {
     // A plain timeout, not requestAnimationFrame: rAF does not run in a
-    // background tab, and the hero copy must never stay hidden.
-    var ready = function () { hero.classList.add("is-ready"); };
-    if (reduced) ready();
-    else setTimeout(ready, 120);
+    // background tab, and the fragments must never stay hidden.
+    setTimeout(function () { hero.classList.add("is-ready"); }, reduced ? 0 : 150);
 
     var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    var layers = $$(".obj-px", hero);
+    var layers = $$(".fc-px", hero);
     if (finePointer && !reduced && layers.length) {
       var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
       var step = function () {
@@ -216,8 +232,8 @@
       };
       window.addEventListener("pointermove", function (e) {
         if (window.scrollY > window.innerHeight) return;
-        tx = (e.clientX / window.innerWidth - 0.5) * -28;
-        ty = (e.clientY / window.innerHeight - 0.5) * -20;
+        tx = (e.clientX / window.innerWidth - 0.5) * -16;
+        ty = (e.clientY / window.innerHeight - 0.5) * -12;
         if (!raf) raf = requestAnimationFrame(step);
       }, { passive: true });
     }
@@ -232,7 +248,7 @@
     var names = ticker.map(function (t) { return t.name; });
     var rows = [[], [], []];
     names.forEach(function (n, i) { rows[i % 3].push(n); });
-    // Every row needs enough pills to overflow before it repeats
+    // Each row needs enough pills to overflow before it repeats
     rows = rows.map(function (r, ri) {
       var out = r.slice();
       var k = 0;
@@ -240,16 +256,15 @@
       return out;
     });
     marq.innerHTML = "";
-    rows.forEach(function (items, ri) {
+    rows.forEach(function (items) {
       var row = document.createElement("div");
       row.className = "marq-row";
       for (var rep = 0; rep < 2; rep++) {
         var track = document.createElement("div");
         track.className = "marq-track";
-        if (rep) track.setAttribute("aria-hidden", "true");
-        items.forEach(function (name, i) {
+        items.forEach(function (name) {
           var pill = document.createElement("span");
-          pill.className = "marq-pill" + ((i + ri) % 5 === 1 ? " is-hot" : (i + ri) % 5 === 3 ? " is-cool" : "");
+          pill.className = "marq-pill";
           pill.textContent = name;
           track.appendChild(pill);
         });
@@ -265,7 +280,18 @@
   var about = $("#about");
   var aboutText = $("#aboutText");
   if (about && aboutText) {
-    splitWords(aboutText);
+    var frag = document.createDocumentFragment();
+    aboutText.textContent.split(/\s+/).forEach(function (word, i) {
+      if (!word) return;
+      if (i) frag.appendChild(document.createTextNode(" "));
+      var s = document.createElement("span");
+      s.className = "w";
+      s.textContent = word;
+      frag.appendChild(s);
+    });
+    aboutText.textContent = "";
+    aboutText.appendChild(frag);
+
     var words = $$(".w", aboutText);
     var lastLit = -1;
     var paint = function () {
@@ -278,6 +304,7 @@
       lastLit = lit;
       words.forEach(function (w, i) { w.classList.toggle("is-lit", i < lit); });
     };
+
     if (reduced) {
       words.forEach(function (w) { w.classList.add("is-lit"); });
     } else {
@@ -290,62 +317,5 @@
       window.addEventListener("resize", paint);
       paint();
     }
-  }
-
-  /* ============================================================
-     IN VIEW REVEALS
-     ============================================================ */
-  var inview = $$("[data-inview]");
-  if ("IntersectionObserver" in window && !reduced) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-in");
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.3 });
-    inview.forEach(function (el) { io.observe(el); });
-  } else {
-    inview.forEach(function (el) { el.classList.add("is-in"); });
-  }
-
-  // Feature 1 status pill walks through the life of an offer
-  var status = $("#f1Status");
-  if (status && !reduced) {
-    var phases = ["Reading the offer", "Locking collateral", "Terms fixed at open"];
-    var pi = phases.length - 1;
-    setInterval(function () {
-      pi = (pi + 1) % phases.length;
-      status.textContent = phases[pi];
-    }, 2200);
-  }
-
-  /* ---------- Split a paragraph into word spans (keeps <em>) ---------- */
-  function splitWords(el) {
-    function split(node, accent) {
-      Array.prototype.slice.call(node.childNodes).forEach(function (child) {
-        if (child.nodeType === 3) {
-          var frag = document.createDocumentFragment();
-          child.textContent.split(/(\s+)/).forEach(function (piece) {
-            if (!piece) return;
-            if (/^\s+$/.test(piece)) {
-              frag.appendChild(document.createTextNode(" "));
-            } else {
-              var s = document.createElement("span");
-              s.className = "w" + (accent ? " is-accent" : "");
-              s.textContent = piece;
-              frag.appendChild(s);
-            }
-          });
-          node.replaceChild(frag, child);
-        } else if (child.nodeType === 1) {
-          split(child, accent || child.tagName === "EM");
-        }
-      });
-    }
-    split(el, false);
-    // The <em> wrappers only carried the accent; drop their styling
-    $$("em", el).forEach(function (em) { em.style.fontStyle = "normal"; });
   }
 })();

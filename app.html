@@ -5,36 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loro: App</title>
   <meta name="description" content="Lend stablecoin or borrow against a Stock Token or ETH at a rate and term fixed on day one.">
+  <meta name="theme-color" content="#2f6bc0">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/base.css">
   <link rel="stylesheet" href="assets/app.css">
 </head>
 <body class="app-body">
 
-  <div class="grain" aria-hidden="true"></div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-mark" viewBox="0 0 32 32">
+      <path d="M9 5.5V26.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="square" fill="none"/>
+      <path d="M9 26.5H23.5" stroke="#ff7a1f" stroke-width="2.6" stroke-linecap="square" fill="none"/>
+      <rect x="8" y="14.9" width="2.2" height="2.2" fill="#ff7a1f"/>
+    </symbol>
+  </svg>
 
-  <div class="top scrolled" id="top">
-    <!-- Network bar. Every value shown here comes from config/loro.config.js. -->
-    <div class="addrbar">
-      <div class="addrbar-inner">
-        <span class="addrbar-label">Network</span>
-        <span class="mono addrbar-value" id="netName">Loading</span>
-        <span class="app-dot" id="netDot" aria-hidden="true"></span>
-        <span class="addrbar-label app-hide-sm">LoroLoan</span>
-        <a class="mono addrbar-value app-hide-sm" id="netContract" target="_blank" rel="noopener">Not deployed</a>
-      </div>
+  <header class="hdr" id="hdr">
+    <a class="brand" href="./" aria-label="Loro home">
+      <svg aria-hidden="true"><use href="#i-mark"/></svg>
+      <span>Loro</span>
+    </a>
+    <div class="hdr-right">
+      <button class="btn btn-accent app-wallet" id="walletBtn" type="button">Connect wallet</button>
+    </div>
+  </header>
+
+  <!-- Sky band: network facts and the section tabs -->
+  <section class="app-sky">
+    <div class="sky" aria-hidden="true">
+      <svg class="sky-clouds" viewBox="0 0 1600 500" preserveAspectRatio="none">
+        <filter id="cloudsApp" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.0022 0.0075" numOctaves="6" seed="21"/>
+          <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3.3 0 0 0 -1.62"/>
+          <feGaussianBlur stdDeviation="0.8"/>
+        </filter>
+        <rect width="1600" height="500" filter="url(#cloudsApp)"/>
+      </svg>
     </div>
 
-    <header class="nav app-nav">
-      <a class="brand" href="./" aria-label="Loro home">
-        <img src="assets/logo.svg" alt="" class="brand-mark">
-        <span class="brand-word">Loro</span>
-      </a>
+    <div class="wrap app-sky-inner">
+      <!-- Every value here comes from config/loro.config.js -->
+      <div class="netbar">
+        <span class="app-dot" id="netDot" aria-hidden="true"></span>
+        <span class="netbar-label">Network</span>
+        <span class="mono netbar-value" id="netName">Loading</span>
+        <span class="netbar-sep app-hide-sm" aria-hidden="true"></span>
+        <span class="netbar-label app-hide-sm">LoroLoan</span>
+        <a class="mono netbar-value app-hide-sm" id="netContract" target="_blank" rel="noopener">Not deployed</a>
+      </div>
 
       <nav class="app-tabs" aria-label="App sections">
         <a class="app-tab" href="#borrow" data-tab="borrow">Borrow</a>
@@ -42,23 +65,17 @@
         <a class="app-tab" href="#loans" data-tab="loans">My loans</a>
         <a class="app-tab" href="#auctions" data-tab="auctions">Auctions</a>
       </nav>
+    </div>
+  </section>
 
-      <div class="nav-cta">
-        <button class="btn btn-accent app-wallet" id="walletBtn" type="button">Connect wallet</button>
-      </div>
-    </header>
-  </div>
-
-  <main class="app" id="app">
+  <main class="app wrap" id="app">
 
     <p class="app-notice" id="notice" role="status" hidden></p>
 
     <!-- ============ BORROW ============ -->
     <section class="app-panel" data-panel="borrow">
       <div class="app-head">
-        <div class="rule" aria-hidden="true"></div>
-        <p class="eyebrow"><span class="sq"></span><span>Borrow</span></p>
-        <h1 class="app-title">Open <em>offers</em></h1>
+        <h1 class="app-title">Open offers</h1>
         <p class="app-copy">Each offer is already funded. Lock the exact collateral it asks for and the stablecoin arrives in the same transaction. Repay principal plus the fixed interest by the deadline and the collateral comes back.</p>
       </div>
       <div class="app-toolbar">
@@ -71,9 +88,7 @@
     <!-- ============ LEND ============ -->
     <section class="app-panel" data-panel="lend" hidden>
       <div class="app-head">
-        <div class="rule" aria-hidden="true"></div>
-        <p class="eyebrow"><span class="sq"></span><span>Lend</span></p>
-        <h1 class="app-title">Write the <em>terms</em></h1>
+        <h1 class="app-title">Write the terms</h1>
         <p class="app-copy">You fund the offer now and set every term. Once a borrower accepts, nothing about it can change.</p>
       </div>
 
@@ -156,9 +171,7 @@
     <!-- ============ MY LOANS ============ -->
     <section class="app-panel" data-panel="loans" hidden>
       <div class="app-head">
-        <div class="rule" aria-hidden="true"></div>
-        <p class="eyebrow"><span class="sq"></span><span>My loans</span></p>
-        <h1 class="app-title">What you <em>owe</em></h1>
+        <h1 class="app-title">What you owe</h1>
         <p class="app-copy">Repay any time up to and including the deadline second. After it passes, repayment is closed and anyone can open the auction.</p>
       </div>
       <div class="app-toolbar">
@@ -171,9 +184,7 @@
     <!-- ============ AUCTIONS ============ -->
     <section class="app-panel" data-panel="auctions" hidden>
       <div class="app-head">
-        <div class="rule" aria-hidden="true"></div>
-        <p class="eyebrow"><span class="sq"></span><span>Auctions</span></p>
-        <h1 class="app-title">Collateral for <em>sale</em></h1>
+        <h1 class="app-title">Collateral for sale</h1>
         <p class="app-copy">Loans past their deadline. Anyone can open the auction, and anyone can fill it at the live price, which only falls. The whole payment goes to the lender, less the protocol fee on interest.</p>
       </div>
       <div class="app-toolbar">
@@ -183,13 +194,13 @@
       <div class="app-grid" id="auctionList"></div>
     </section>
 
-    <p class="app-foot mono">Loro contracts have no admin, no oracle and no upgrade path. The chain is the source of truth; this page only reads it.</p>
+    <p class="app-foot">Loro contracts have no admin, no oracle and no upgrade path. The chain is the source of truth; this page only reads it.</p>
   </main>
 
   <!-- Review before any wallet prompt -->
   <dialog class="app-dialog" id="confirm" aria-labelledby="confirmTitle">
     <form method="dialog" class="app-dialog-inner">
-      <p class="eyebrow"><span class="sq"></span><span id="confirmEyebrow">Review</span></p>
+      <p class="app-eyebrow" id="confirmEyebrow">Review</p>
       <h2 class="app-dialog-title" id="confirmTitle"></h2>
       <dl class="app-summary" id="confirmRows"></dl>
       <ol class="app-steps" id="confirmSteps"></ol>
@@ -211,6 +222,15 @@
     <p class="app-tx-msg" id="txMsg"></p>
   </aside>
 
+  <script>
+    // Header turns solid once the sky band scrolls away
+    (function () {
+      var hdr = document.getElementById("hdr");
+      function onScroll() { hdr.classList.toggle("is-scrolled", window.scrollY > 24); }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
   <script src="assets/vendor/ethers.umd.min.js"></script>
   <script type="module" src="assets/app.js"></script>
 </body>
