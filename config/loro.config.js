@@ -21,8 +21,9 @@ export const networks = {
     explorerUrl: "https://robinhoodchain.blockscout.com", // no trailing slash
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     contracts: {
-      loroLoan: null,     // from `forge script script/Deploy.s.sol` output
-      loroLens: null
+      // Deployed with script/deploy-mainnet.sh, see loro-contracts/deployments/4663.json
+      loroLoan: "0xc04c65fd403022C465a0513765416Bf4681C71A1",
+      loroLens: "0x5E5C1095Dc24fc4968490bE1EeCE3447D235710D"
     },
     // The principal stablecoin is fixed per LoroLoan deployment. The app
     // reads the real address from LoroLoan.stablecoin() and refuses to run
