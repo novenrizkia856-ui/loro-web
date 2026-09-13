@@ -189,12 +189,13 @@
   }
 
   /* cfg is the resolved network from loadConfig() in
-     config/loro.config.js: { name, contracts, stablecoin, docsUrl, deployed } */
+     config/loro.config.js: { name, token, docsUrl, deployed }.
+     The "Contract address" bar belongs to the project token, which is a
+     separate contract from LoroLoan; it stays "Coming soon" until set. */
   function applyConfig(cfg) {
     cfg = cfg || {};
-    var contracts = cfg.contracts || {};
-    var stablecoin = cfg.stablecoin || {};
-    var address = contracts.loroLoan || "";
+    var token = cfg.token || {};
+    var address = token.address || "";
 
     /* ---- Contract address bar ---- */
     var valueEl = $("#addrValue");
@@ -266,7 +267,7 @@
     var tokEl = $("#footToken");
     var statEl = $("#footStatus");
     if (netEl && cfg.name) netEl.textContent = cfg.name;
-    if (tokEl) tokEl.textContent = stablecoin.symbol ? "Borrow " + stablecoin.symbol : "Stablecoin loans";
+    if (tokEl && token.symbol) tokEl.textContent = token.symbol;
     if (statEl) statEl.textContent = deployed ? "Live" : "Not deployed";
 
     var note = $("#statusNote");
