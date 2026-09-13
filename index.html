@@ -27,7 +27,6 @@
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-    <symbol id="i-down" viewBox="0 0 24 24"><path d="M4 7l6 6 3.5-3.5L20 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-eth" viewBox="0 0 24 24"><path d="M12 2.5L5.5 12.4 12 16l6.5-3.6z M12 17.4l-6.5-3.7L12 21.5l6.5-7.8z" fill="currentColor"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-browser" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 9.5h17" stroke="currentColor" stroke-width="2"/></symbol>
@@ -82,67 +81,8 @@
         </svg>
       </div>
 
-      <!-- Product fragments, wide screens only -->
-      <div class="floats" aria-hidden="true">
-        <div class="fc" style="--x:13%;--y:30%">
-          <div class="fc-px" data-depth="1.1"><div class="fc-in" style="--d:.1s"><div class="fc-bob" style="--t:6.5s">
-            <div class="fc-card fc-offer" style="--r:-3deg">
-              <div class="fc-row"><span class="fc-muted">Offer #1042</span><span class="badge-s is-green">Open</span></div>
-              <p class="fc-big">1,200.00 <small>USDG</small></p>
-              <p class="fc-muted">7.50% fixed · 90 days</p>
-              <div class="fc-divider"></div>
-              <div class="fc-row"><span class="fc-muted">Collateral</span><b>1.00 ETH</b></div>
-            </div>
-          </div></div></div>
-        </div>
-
-        <div class="fc" style="--x:87%;--y:26%">
-          <div class="fc-px" data-depth="1.4"><div class="fc-in" style="--d:.2s"><div class="fc-bob" style="--t:5.8s">
-            <div class="fc-card fc-chip" style="--r:3deg">
-              <span class="glyph glyph-eth"><svg><use href="#i-eth"/></svg></span>
-              <span><b>1.00 ETH locked</b><span>Held by the contract</span></span>
-            </div>
-          </div></div></div>
-        </div>
-
-        <div class="fc" style="--x:11%;--y:66%">
-          <div class="fc-px" data-depth="1.6"><div class="fc-in" style="--d:.3s"><div class="fc-bob" style="--t:7s">
-            <div class="fc-card fc-toast" style="--r:2deg">
-              <span class="glyph glyph-ok"><svg><use href="#i-check"/></svg></span>
-              <span><b>Loan #0981 repaid</b><span>Collateral returned</span></span>
-            </div>
-          </div></div></div>
-        </div>
-
-        <div class="fc" style="--x:88%;--y:60%">
-          <div class="fc-px" data-depth="1.2"><div class="fc-in" style="--d:.35s"><div class="fc-bob" style="--t:6.2s">
-            <div class="fc-card fc-auction" style="--r:-2deg">
-              <div class="fc-row"><span class="fc-muted">Auction #0877</span><span class="badge-s is-amber">Live</span></div>
-              <p class="fc-big">3,410.22 <small>USDG</small></p>
-              <div class="fc-bar"><i></i></div>
-              <div class="fc-row" style="margin-top:8px"><span class="fc-muted">Price falls to 3,120.00</span><svg width="14" height="14" style="color:var(--amber)"><use href="#i-down"/></svg></div>
-            </div>
-          </div></div></div>
-        </div>
-
-        <div class="fc" style="--x:25%;--y:88%">
-          <div class="fc-px" data-depth="1.8"><div class="fc-in" style="--d:.45s"><div class="fc-bob" style="--t:5.4s">
-            <div class="fc-card fc-chip" style="--r:-2deg">
-              <span class="glyph glyph-cal"><svg><use href="#i-cal"/></svg></span>
-              <span><b>Repay by 13 Nov 2026</b><span>Set when the loan opened</span></span>
-            </div>
-          </div></div></div>
-        </div>
-
-        <div class="fc" style="--x:75%;--y:88%">
-          <div class="fc-px" data-depth="1.5"><div class="fc-in" style="--d:.5s"><div class="fc-bob" style="--t:6.8s">
-            <div class="fc-card fc-chip" style="--r:2deg">
-              <span class="glyph glyph-lock"><svg><use href="#i-lock"/></svg></span>
-              <span><b>Rate locked at 7.50%</b><span>For the whole term</span></span>
-            </div>
-          </div></div></div>
-        </div>
-      </div>
+      <!-- 3D objects, drawn by landing.js with three.js -->
+      <canvas class="hero-3d" id="hero3d" aria-hidden="true"></canvas>
 
       <div class="hero-main">
         <div>
@@ -219,20 +159,20 @@
     <section class="steps" id="how">
       <div class="wrap">
         <div class="sec-head">
-          <span class="tag">How it works</span>
-          <h2 class="sec-title">Three steps.</h2>
+          <span class="tag" data-reveal>How it works</span>
+          <h2 class="sec-title" data-split>Three steps.</h2>
         </div>
 
-        <div class="steps-row">
-          <article class="step">
+        <div class="steps-row" data-stagger>
+          <article class="step" data-reveal data-tilt="4">
             <div class="step-top"><span class="num">1</span><span class="step-when">Day 0</span></div>
-            <div class="step-vis" aria-hidden="true">
+            <div class="step-vis" aria-hidden="true" data-loop="assets">
               <div class="ui-list">
-                <div class="ui-item is-on"><span class="ui-radio"></span><span class="glyph glyph-eth"><svg style="width:12px;height:12px"><use href="#i-eth"/></svg></span><b>ETH</b><span class="fc-muted">2.40</span></div>
-                <div class="ui-item"><span class="ui-radio"></span><span class="glyph glyph-usd">ST</span><b>Stock Token</b><span class="fc-muted">—</span></div>
-                <div class="ui-item"><span class="ui-radio"></span><span class="glyph" style="background:var(--soft);color:var(--muted)">0x</span><b>Other ERC20</b><span class="fc-muted">paste</span></div>
+                <div class="ui-item is-on" data-amount="1.00" data-unit="ETH to lock"><span class="ui-radio"></span><span class="glyph glyph-eth"><svg style="width:12px;height:12px"><use href="#i-eth"/></svg></span><b>ETH</b><span class="fc-muted">2.40</span></div>
+                <div class="ui-item" data-amount="12.00" data-unit="Stock Token to lock"><span class="ui-radio"></span><span class="glyph glyph-usd">ST</span><b>Stock Token</b><span class="fc-muted">30.00</span></div>
+                <div class="ui-item" data-amount="2,400" data-unit="tokens to lock"><span class="ui-radio"></span><span class="glyph glyph-soft">0x</span><b>Other ERC20</b><span class="fc-muted">paste</span></div>
               </div>
-              <div class="ui-field">1.00 <span>ETH to lock</span></div>
+              <div class="ui-field"><span class="ui-typed" data-typed>1.00</span><span class="ui-unit" data-unit-label>ETH to lock</span></div>
             </div>
             <div>
               <h3 class="step-title">Lock collateral</h3>
@@ -240,13 +180,13 @@
             </div>
           </article>
 
-          <article class="step">
+          <article class="step" data-reveal data-tilt="4">
             <div class="step-top"><span class="num">2</span><span class="step-when">Same transaction</span></div>
-            <div class="step-vis" aria-hidden="true">
+            <div class="step-vis" aria-hidden="true" data-loop="offers">
               <div class="ui-list">
                 <div class="ui-offer"><b>900.00 USDG</b><span class="btn btn-ghost">View</span><span class="mono">6.90% · 60d · 0x91c…4e0a</span></div>
-                <div class="ui-offer is-picked" style="border-top:1px solid var(--line)"><b>1,200.00 USDG</b><span class="btn btn-accent">Accept</span><span class="mono">7.50% · 90d · 0x3f2…a19c</span></div>
-                <div class="ui-offer" style="border-top:1px solid var(--line)"><b>2,500.00 USDG</b><span class="btn btn-ghost">View</span><span class="mono">8.10% · 120d · 0x7d4…02b1</span></div>
+                <div class="ui-offer is-picked"><b>1,200.00 USDG</b><span class="btn btn-accent">Accept</span><span class="mono">7.50% · 90d · 0x3f2…a19c</span></div>
+                <div class="ui-offer"><b>2,500.00 USDG</b><span class="btn btn-ghost">View</span><span class="mono">8.10% · 120d · 0x7d4…02b1</span></div>
               </div>
             </div>
             <div>
@@ -255,15 +195,15 @@
             </div>
           </article>
 
-          <article class="step">
+          <article class="step" data-reveal data-tilt="4">
             <div class="step-top"><span class="num">3</span><span class="step-when">By the deadline</span></div>
-            <div class="step-vis" aria-hidden="true">
+            <div class="step-vis" aria-hidden="true" data-loop="loan">
               <div class="ui-loan">
                 <div class="fc-row"><b>Loan #1042</b><span class="badge-s is-blue">Active</span></div>
-                <div class="ph-track"><i></i></div>
-                <div class="fc-row"><span class="fc-muted">Day 62 of 90</span><span class="mono" style="font-size:12px">1,222.19 due</span></div>
+                <div class="ph-track"><i data-fill style="width:69%"></i></div>
+                <div class="fc-row"><span class="fc-muted">Day <span data-day>62</span> of 90</span><span class="mono ui-small">1,222.19 due</span></div>
                 <div class="ui-loan-actions">
-                  <span class="mono fc-muted" style="font-size:12px">27d 04h left</span>
+                  <span class="mono fc-muted ui-small" data-clock>27d 04h 12m 09s</span>
                   <span class="btn btn-accent">Repay</span>
                 </div>
               </div>
@@ -281,13 +221,13 @@
     <section class="features" id="features">
       <div class="wrap">
         <div class="sec-head">
-          <span class="tag">Why Loro</span>
-          <h2 class="sec-title">Nothing left to trust.</h2>
-          <p class="sec-sub">The rules live in the contract, and the contract cannot be edited.</p>
+          <span class="tag" data-reveal>Why Loro</span>
+          <h2 class="sec-title" data-split>Nothing left to trust.</h2>
+          <p class="sec-sub" data-reveal>The rules live in the contract, and the contract cannot be edited.</p>
         </div>
 
-        <div class="feat-grid">
-          <article class="feat">
+        <div class="feat-grid" data-stagger>
+          <article class="feat" data-reveal data-anim data-tilt="2.5">
             <div class="feat-vis" aria-hidden="true">
               <div class="panel">
                 <table class="cmp">
@@ -307,7 +247,7 @@
             </div>
           </article>
 
-          <article class="feat">
+          <article class="feat" data-reveal data-anim data-tilt="2.5">
             <div class="feat-vis" aria-hidden="true">
               <div class="panel">
                 <div class="panel-head">
@@ -315,10 +255,10 @@
                   <a class="panel-link" data-contract-link aria-disabled="true">View on explorer ↗</a>
                 </div>
                 <div class="facts">
-                  <div class="fact"><span>Owner</span><b>none</b></div>
-                  <div class="fact"><span>Upgradeable</span><b>false</b></div>
-                  <div class="fact"><span>Pausable</span><b>false</b></div>
-                  <div class="fact"><span>Price feeds</span><b>0</b></div>
+                  <div class="fact"><span>Owner</span><b>none <i class="fact-ok"><svg><use href="#i-check"/></svg></i></b></div>
+                  <div class="fact"><span>Upgradeable</span><b>false <i class="fact-ok"><svg><use href="#i-check"/></svg></i></b></div>
+                  <div class="fact"><span>Pausable</span><b>false <i class="fact-ok"><svg><use href="#i-check"/></svg></i></b></div>
+                  <div class="fact"><span>Price feeds</span><b>0 <i class="fact-ok"><svg><use href="#i-check"/></svg></i></b></div>
                 </div>
               </div>
             </div>
@@ -328,7 +268,7 @@
             </div>
           </article>
 
-          <article class="feat">
+          <article class="feat" data-reveal data-anim data-tilt="2.5">
             <div class="feat-vis" aria-hidden="true">
               <div class="panel tl">
                 <div class="fc-row"><b>Loan #1042</b><span class="fc-muted">90 day term + 2 day auction</span></div>
@@ -349,8 +289,8 @@
             </div>
           </article>
 
-          <article class="feat">
-            <div class="feat-vis" aria-hidden="true">
+          <article class="feat" data-reveal data-anim data-tilt="2.5">
+            <div class="feat-vis" aria-hidden="true" data-loop="wallets">
               <div class="panel">
                 <div class="panel-head"><b>Connect a wallet</b><span class="fc-muted">That's the sign up</span></div>
                 <div class="wallets">
@@ -367,15 +307,15 @@
           </article>
         </div>
 
-        <div class="status-row"><p class="status-note" id="statusNote">Contracts are not deployed yet. Nothing on this page is live.</p></div>
+        <div class="status-row" data-reveal><p class="status-note" id="statusNote">Contracts are not deployed yet. Nothing on this page is live.</p></div>
       </div>
     </section>
 
     <!-- ============ CTA ============ -->
     <section class="cta">
       <div class="wrap">
-        <a class="cta-band" href="app">
-          <span class="cta-text">Nothing to sign up for.</span>
+        <a class="cta-band" href="app" data-reveal>
+          <span class="cta-text" data-split>Nothing to sign up for.</span>
           <span class="cta-go">Open the app <svg aria-hidden="true"><use href="#i-arrow"/></svg></span>
         </a>
       </div>
@@ -395,7 +335,7 @@
       </div>
 
       <div class="wrap">
-        <div class="foot-card">
+        <div class="foot-card" data-reveal>
           <div class="foot-top">
             <div>
               <a class="brand" href="#home">
@@ -446,7 +386,9 @@
 
   </main>
 
+  <script src="assets/vendor/three.min.js"></script>
   <script src="assets/content.js"></script>
+  <script src="assets/cursor.js"></script>
   <script src="assets/landing.js"></script>
 
   <!-- Deployment values. The only place addresses live. -->

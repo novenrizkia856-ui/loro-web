@@ -14,14 +14,16 @@ index.html                 landing page
 app.html                   the app: borrow, lend, my loans, auctions
 config/loro.config.js      networks, addresses, assets  (the only place these live)
 config/loro.local.js       GENERATED Anvil addresses, localhost only, not deployed
-assets/styles.css          design system and every landing component
-assets/app.css             app components, built only from styles.css tokens
-assets/script.js           landing content binding, config binding, motion
-assets/content.js          copy for the landing list sections
+assets/base.css            tokens, reset, header, buttons, sky, cursor (both pages)
+assets/landing.css         landing sections and their motion
+assets/app.css             app components, built on base.css tokens
+assets/landing.js          landing config binding, 3D hero objects, scroll motion, reveals
+assets/cursor.js           custom cursor, magnetic controls, card tilt (both pages)
+assets/content.js          landing marquee copy
 assets/app.js              wallet, reads, transactions
 assets/loro-core.js        protocol math and units, no DOM, mirrors the contract
 assets/loro-abi.js         GENERATED ABIs from loro-contracts
-assets/vendor/             three.js, gsap, ScrollTrigger, ethers 6.15.0,
+assets/vendor/             three.js (hero objects), ethers 6.15.0,
                            WalletConnect provider 2.24.0 (single ESM bundle, lazy loaded)
 tests/                     node tests for loro-core, Solidity computed vectors
 tools/sync-contracts.mjs   copies ABIs, vectors and local addresses from loro-contracts
@@ -179,30 +181,27 @@ and the meta description. Use two words ("fixed term"), one merged word
 
 Dashes in code, class names, file names, and URLs are fine and often required.
 
-## Metric numbers and the interface mock
+## Example figures on the landing page
 
-Both live in the light section of the landing page.
-
-The four metrics render from `home.metrics` in `assets/content.js`. Shape is
-`{ prefix, value, suffix, label }`. A numeric `value` above zero counts up on
-scroll; anything else is printed as written. They read zero because those four are
-structural facts of the protocol rather than traction figures.
-
-The interface mock is a borrower dashboard shown inside a laptop frame. All of
-it is HTML and CSS, not a screenshot. It carries a "Preview" tag and a caption
-saying the values are an example. The figures are internally consistent, so change
-them together.
+The phone, the step cards and the feature panels show a sample loan (#1042:
+1,200.00 USDG against 1.00 ETH, 7.50% over 90 days, due 13 Nov 2026). All of it is
+HTML and CSS, not screenshots, and the figures are internally consistent, so change
+them together. The LoroLoan address and its explorer link in "No admin keys" are
+real and come from config.
 
 ## Notes on the design
 
-- Type is Fraunces for display, Schibsted Grotesk for interface and body, and
-  JetBrains Mono for real values, set once as `--serif`, `--sans` and `--mono` at
-  the top of `styles.css`.
-- Palette is six named colours defined once at the top of `styles.css`. The app
-  adds no colours of its own.
-- Monospace is reserved for real values: addresses, amounts, step numerals.
-- `assets/logo.svg` and `assets/favicon.svg` carry the two brand colours as literal
-  hex, because an `<img>` cannot read CSS variables.
-- The landing motion system is unchanged: preloader, particle field, pinned cards,
-  word by word reveal, clip path reveals. The app uses short entrance transitions
-  only. Everything respects `prefers-reduced-motion`.
+- Type is Geist for everything and Geist Mono for real values, set once as
+  `--sans` and `--mono` at the top of `base.css`.
+- Colours are defined once at the top of `base.css`: light surfaces, one tangerine
+  accent, and status colours. The app adds none of its own.
+- The sky is a CSS gradient with procedural clouds from an SVG turbulence filter,
+  so there is no image to load.
+- The hero objects are real 3D (three.js) with a baked studio environment for
+  reflections. Without WebGL the hero still works; the canvas stays empty.
+- Motion: word by word title reveals, scroll reveals, the phone rising, marquee skew
+  from scroll speed, small live demos inside the cards, and a cursor that tilts cards
+  and pulls buttons. The cursor only replaces the pointer on mouse and trackpad.
+  Everything respects `prefers-reduced-motion`.
+- `assets/favicon.svg` carries the brand colours as literal hex, because an icon
+  cannot read CSS variables.

@@ -3,7 +3,7 @@
 
    Prose that appears once lives directly in index.html.
    This file holds only the repeating lists, which the
-   renderers in script.js turn into markup.
+   renderers in landing.js turn into markup.
    ============================================================ */
 
 window.LoroContent = {
