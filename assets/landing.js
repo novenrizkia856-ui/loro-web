@@ -5,8 +5,7 @@
    - Hero: title entrance and the three.js objects
    - Scroll motion: phone, marquee, word reveal, footer word
    - In view reveals and the small live demos in the cards
-   Needs assets/vendor/three.min.js for the hero objects only;
-   everything else runs without it.
+   The hero 3D objects are in assets/hero3d.js.
    ============================================================ */
 
 (function () {
@@ -241,273 +240,7 @@
   // background tab, and the hero copy must never stay hidden.
   if (hero) setTimeout(function () { hero.classList.add("is-ready"); }, reduced ? 0 : 150);
 
-  var mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-  window.addEventListener("pointermove", function (e) {
-    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.ty = (e.clientY / window.innerHeight) * 2 - 1;
-  }, { passive: true });
-
-  initHeroObjects();
-
-  /* Glossy 3D objects around the hero copy. They rise in when the page
-     loads, bob and turn on their own, lean toward the pointer, and
-     scatter upward while the hero scrolls away. */
-  function initHeroObjects() {
-    var canvas = $("#hero3d");
-    var THREE = window.THREE;
-    if (!canvas || !hero || !THREE) return;
-
-    var renderer;
-    try {
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
-    } catch (e) {
-      return; // no WebGL: the hero stands on its own
-    }
-    if (THREE.ColorManagement) THREE.ColorManagement.legacyMode = false;
-    var small = window.innerWidth < 768;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2));
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
-
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-    camera.position.set(0, 0, 16);
-
-    /* ---- Environment: a daylight studio baked once for reflections ---- */
-    var pmrem = new THREE.PMREMGenerator(renderer);
-    var studio = new THREE.Scene();
-    var domeGeo = new THREE.SphereGeometry(20, 48, 24);
-    var domeCols = [];
-    var p = domeGeo.attributes.position;
-    for (var i = 0; i < p.count; i++) {
-      var h = p.getY(i) / 20;
-      if (h > 0) domeCols.push(0.5 + 0.5 * (1 - h), 0.66 + 0.34 * (1 - h), 1);
-      else domeCols.push(0.78 + 0.22 * (1 + h), 0.72 + 0.28 * (1 + h), 0.66 + 0.34 * (1 + h));
-    }
-    domeGeo.setAttribute("color", new THREE.Float32BufferAttribute(domeCols, 3));
-    studio.add(new THREE.Mesh(domeGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
-    function softbox(w, hgt, x, y, z, power) {
-      var m = new THREE.Mesh(
-        new THREE.PlaneGeometry(w, hgt),
-        new THREE.MeshBasicMaterial({ color: new THREE.Color(power, power, power), side: THREE.DoubleSide })
-      );
-      m.position.set(x, y, z);
-      m.lookAt(0, 0, 0);
-      studio.add(m);
-    }
-    softbox(16, 6, -8, 13, 6, 5);
-    softbox(8, 10, 13, 3, 8, 2.6);
-    softbox(24, 3, 0, -11, 9, 1.2);
-    scene.environment = pmrem.fromScene(studio, 0.03).texture;
-    pmrem.dispose();
-
-    var sun = new THREE.DirectionalLight(0xffffff, 1.4);
-    sun.position.set(-6, 9, 10);
-    scene.add(sun);
-    scene.add(new THREE.HemisphereLight(0xd6e6ff, 0x9a8a78, 0.5));
-
-    /* ---- Materials ---- */
-    var mat = {
-      gold: new THREE.MeshPhysicalMaterial({ color: 0xf0bd48, metalness: 1, roughness: 0.24, clearcoat: 0.5, clearcoatRoughness: 0.2 }),
-      chrome: new THREE.MeshPhysicalMaterial({ color: 0xe9eef6, metalness: 1, roughness: 0.12 }),
-      orange: new THREE.MeshPhysicalMaterial({ color: 0xff7a1f, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.1 }),
-      gem: new THREE.MeshPhysicalMaterial({ color: 0x8a7bff, metalness: 0.2, roughness: 0.05, clearcoat: 1, flatShading: true, iridescence: 0.7, iridescenceIOR: 1.6 }),
-      mint: new THREE.MeshPhysicalMaterial({ color: 0x25c795, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.08 }),
-      blue: new THREE.MeshPhysicalMaterial({ color: 0x2f6fe0, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.08 }),
-      white: new THREE.MeshPhysicalMaterial({ color: 0xf7f7fa, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.06 }),
-      ink: new THREE.MeshPhysicalMaterial({ color: 0x1b2230, roughness: 0.35, metalness: 0.3, clearcoat: 0.6 })
-    };
-
-    /* ---- Geometry helpers ---- */
-    function roundedRect(w, hgt, r) {
-      var s = new THREE.Shape();
-      var x = -w / 2, y = -hgt / 2;
-      s.moveTo(x + r, y);
-      s.lineTo(x + w - r, y);
-      s.quadraticCurveTo(x + w, y, x + w, y + r);
-      s.lineTo(x + w, y + hgt - r);
-      s.quadraticCurveTo(x + w, y + hgt, x + w - r, y + hgt);
-      s.lineTo(x + r, y + hgt);
-      s.quadraticCurveTo(x, y + hgt, x, y + hgt - r);
-      s.lineTo(x, y + r);
-      s.quadraticCurveTo(x, y, x + r, y);
-      return s;
-    }
-    function slab(w, hgt, depth, r, bevel) {
-      var g = new THREE.ExtrudeGeometry(roundedRect(w - 2 * bevel, hgt - 2 * bevel, Math.max(0.02, r - bevel)), {
-        depth: depth - 2 * bevel, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 6, curveSegments: 14
-      });
-      g.center();
-      return g;
-    }
-    function mesh(geo, m, x, y, z) {
-      var o = new THREE.Mesh(geo, m);
-      o.position.set(x || 0, y || 0, z || 0);
-      return o;
-    }
-
-    /* ---- Objects ---- */
-    function coin() {
-      var g = new THREE.Group();
-      var body = mesh(new THREE.CylinderGeometry(1, 1, 0.24, 72), mat.gold);
-      body.rotation.x = Math.PI / 2;
-      g.add(body);
-      [0.125, -0.125].forEach(function (z) {
-        g.add(mesh(new THREE.TorusGeometry(0.86, 0.045, 12, 72), mat.gold, 0, 0, z));
-      });
-      // The Loro mark, raised on both faces
-      [1, -1].forEach(function (side) {
-        g.add(mesh(new THREE.BoxGeometry(0.15, 0.76, 0.07), mat.ink, -0.14 * side, 0.06, 0.14 * side));
-        g.add(mesh(new THREE.BoxGeometry(0.5, 0.15, 0.07), mat.orange, 0.04 * side, -0.25, 0.14 * side));
-      });
-      return g;
-    }
-    function gem() {
-      var o = mesh(new THREE.OctahedronGeometry(1, 0), mat.gem);
-      o.scale.set(0.78, 1.28, 0.78);
-      var g = new THREE.Group();
-      g.add(o);
-      return g;
-    }
-    function lock() {
-      var g = new THREE.Group();
-      g.add(mesh(slab(1.55, 1.25, 0.64, 0.3, 0.1), mat.orange, 0, -0.24, 0));
-      var shackle = mesh(new THREE.TorusGeometry(0.46, 0.12, 24, 64, Math.PI), mat.chrome, 0, 0.42, 0);
-      g.add(shackle);
-      [-0.46, 0.46].forEach(function (x) {
-        g.add(mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.34, 24), mat.chrome, x, 0.26, 0));
-      });
-      var hole = mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.08, 32), mat.ink, 0, -0.16, 0.32);
-      hole.rotation.x = Math.PI / 2;
-      g.add(hole);
-      g.add(mesh(new THREE.BoxGeometry(0.08, 0.26, 0.08), mat.ink, 0, -0.34, 0.32));
-      return g;
-    }
-    function cube() {
-      var g = new THREE.Group();
-      g.add(mesh(slab(1.25, 1.25, 1.25, 0.24, 0.16), mat.mint));
-      [[-0.3, 0.26], [0, 0.46], [0.3, 0.68]].forEach(function (b) {
-        g.add(mesh(new THREE.BoxGeometry(0.17, b[1], 0.06), mat.white, b[0], -0.34 + b[1] / 2, 0.64));
-      });
-      return g;
-    }
-    function stable() {
-      var g = new THREE.Group();
-      var body = mesh(new THREE.CylinderGeometry(0.88, 0.88, 0.22, 64), mat.blue);
-      body.rotation.x = Math.PI / 2;
-      g.add(body);
-      var face = mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.24, 64), mat.white);
-      face.rotation.x = Math.PI / 2;
-      g.add(face);
-      [0.115, -0.115].forEach(function (z) {
-        g.add(mesh(new THREE.TorusGeometry(0.74, 0.03, 10, 64), mat.chrome, 0, 0, z));
-      });
-      return g;
-    }
-    function ring() { var g = new THREE.Group(); g.add(mesh(new THREE.TorusGeometry(0.72, 0.25, 40, 96), mat.white)); return g; }
-    function pill() {
-      var g = new THREE.Group();
-      var a = mesh(new THREE.CapsuleGeometry(0.28, 0.5, 10, 24), mat.orange, 0, 0.26, 0);
-      var b = mesh(new THREE.CapsuleGeometry(0.28, 0.5, 10, 24), mat.white, 0, -0.26, 0);
-      g.add(a); g.add(b);
-      return g;
-    }
-    function pearl() { var g = new THREE.Group(); g.add(mesh(new THREE.SphereGeometry(0.42, 48, 32), mat.chrome)); return g; }
-
-    // nx/ny place each object in screen space (-1..1); mx/my on phones.
-    var DEFS = [
-      // On phones the copy fills the middle, so the objects sit in the
-      // strip above the title and the gap between the button and the phone.
-      { make: coin,   nx: -0.74, ny:  0.44, mx: -0.7,  my:  0.8,  s: 1.3,  lift: 1.3, spin: [0.2, 0.9, 0.05] },
-      { make: gem,    nx:  0.75, ny:  0.5,  mx:  0.72, my:  0.78, s: 1.1,  lift: 1.7, spin: [0.1, 0.8, 0.12] },
-      { make: lock,   nx: -0.63, ny: -0.38, mx: -0.62, my: -0.5,  s: 1.2,  lift: 0.9, spin: [0.12, 0.45, 0.04] },
-      { make: cube,   nx:  0.64, ny: -0.42, mx:  0.64, my: -0.52, s: 1.05, lift: 1.1, spin: [0.35, 0.5, 0.2] },
-      { make: stable, nx: -0.92, ny:  0.02, s: 0.85, lift: 1.9, spin: [0.1, 0.75, 0.25], wide: true },
-      { make: ring,   nx:  0.93, ny:  0.06, s: 0.85, lift: 1.4, spin: [0.55, 0.3, 0.1], wide: true },
-      { make: pill,   nx:  0.36, ny: -0.86, s: 0.72, lift: 2.2, spin: [0.3, 0.2, 0.7], wide: true },
-      { make: pearl,  nx: -0.38, ny: -0.84, s: 0.5,  lift: 2.4, spin: [0, 0, 0], wide: true }
-    ];
-    var items = [];
-    DEFS.forEach(function (d, k) {
-      if (small && d.wide) return;
-      var group = d.make();
-      var holder = new THREE.Group();
-      holder.add(group);
-      scene.add(holder);
-      items.push({
-        d: d, holder: holder, obj: group,
-        rot: [Math.random() * 6, Math.random() * 6, Math.random() * 6],
-        phase: Math.random() * Math.PI * 2,
-        delay: k * 0.09
-      });
-    });
-
-    var halfH = 1, halfW = 1;
-    function resize() {
-      var w = hero.clientWidth, hgt = hero.clientHeight;
-      renderer.setSize(w, hgt, false);
-      camera.aspect = w / hgt;
-      camera.updateProjectionMatrix();
-      halfH = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
-      halfW = halfH * camera.aspect;
-    }
-    resize();
-    window.addEventListener("resize", resize);
-
-    function easeOutBack(x) {
-      var c1 = 1.4, c3 = c1 + 1;
-      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
-    }
-
-    var visible = true;
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }).observe(hero);
-    }
-
-    var sizeFactor = clamp(halfW / 7, 0.62, 1.15);
-    function frame(now) {
-      requestAnimationFrame(frame);
-      if (!visible || document.hidden) return;
-
-      var t = now / 1000;
-      var since = (now - readyAt) / 1000;
-      var scroll = clamp(window.scrollY / Math.max(1, hero.offsetHeight), 0, 1.4);
-
-      mouse.x += (mouse.tx - mouse.x) * 0.05;
-      mouse.y += (mouse.ty - mouse.y) * 0.05;
-      sizeFactor = clamp(halfW / 7, 0.62, 1.15);
-
-      items.forEach(function (it) {
-        var d = it.d;
-        var e = reduced ? 1 : clamp((since - it.delay) / 1.4, 0, 1);
-        var enter = e >= 1 ? 1 : easeOutBack(e);
-        var nx = small && d.mx != null ? d.mx : d.nx;
-        var ny = small && d.my != null ? d.my : d.ny;
-        var depth = d.s * 0.35;
-
-        var x = nx * halfW * 0.9 * (1 + scroll * 0.35) + mouse.x * depth;
-        var y = ny * halfH * 0.84
-          - (1 - enter) * halfH * 1.7
-          + scroll * halfH * d.lift
-          + (reduced ? 0 : Math.sin(t * 0.9 + it.phase) * 0.14)
-          - mouse.y * depth;
-
-        it.holder.position.set(x, y, 0);
-        it.holder.scale.setScalar(Math.max(0.001, d.s * sizeFactor * (small ? 0.55 : 1) * (0.3 + 0.7 * enter) * (1 - scroll * 0.25)));
-
-        var spin = reduced ? 0 : t * 0.35;
-        it.obj.rotation.set(
-          it.rot[0] + spin * d.spin[0] + scroll * 2.4 + mouse.y * 0.35,
-          it.rot[1] + spin * d.spin[1] + scroll * 3.2 + mouse.x * 0.45,
-          it.rot[2] + spin * d.spin[2]
-        );
-      });
-
-      renderer.render(scene, camera);
-    }
-    requestAnimationFrame(frame);
-  }
+  // The 3D objects live in assets/hero3d.js
 
   /* ============================================================
      PILL MARQUEE (content.js ticker)
@@ -607,7 +340,7 @@
     if (foot && footWord) {
       var fr = foot.getBoundingClientRect();
       var fq = clamp((vh - fr.top) / fr.height, 0, 1);
-      footWord.style.transform = "translateX(-50%) translateY(" + ((1 - fq) * 45).toFixed(1) + "%)";
+      footWord.style.transform = "translateY(" + ((1 - fq) * 40).toFixed(1) + "%)";
     }
 
     if (marq) {
@@ -726,6 +459,172 @@
       if (el.classList.contains("is-visible") && !document.hidden) tick();
     }, demo.every);
   }
+
+  /* ============================================================
+     LIVE DETAILS: phone, about, steps, feature panels
+     ============================================================ */
+  function fmtMoney(n) {
+    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function countTo(el, to, ms) {
+    if (!el) return;
+    var t0 = performance.now();
+    var run = setInterval(function () {
+      var q = clamp((performance.now() - t0) / ms, 0, 1);
+      el.textContent = fmtMoney(to * (1 - Math.pow(1 - q, 3)));
+      if (q >= 1) clearInterval(run);
+    }, 30);
+  }
+
+  // Phone: the balance counts up and notifications slide in
+  DEMOS.phone = {
+    every: 4600,
+    setup: function (el) {
+      var toast = $(".ph-toast", el);
+      var title = $("[data-t]", toast);
+      var line = $("[data-l]", toast);
+      var msgs = [
+        ["Offer accepted", "+1,200.00 USDG received"],
+        ["Rate locked", "7.50% until 13 Nov 2026"],
+        ["Reminder", "Repay 1,222.19 USDG in 27 days"]
+      ];
+      var i = 0;
+      countTo($("[data-count-to]", el), 1200, 1700);
+      function tick() {
+        var m = msgs[i++ % msgs.length];
+        title.textContent = m[0];
+        line.textContent = m[1];
+        toast.classList.remove("is-on");
+        void toast.offsetWidth;
+        toast.classList.add("is-on");
+      }
+      setTimeout(tick, 1200);
+      return tick;
+    }
+  };
+
+  // Steps: the current step walks along the track
+  DEMOS.steps = {
+    every: 2800,
+    setup: function (el) {
+      var cards = $$(".step", el);
+      var dots = $$(".steps-track b", el);
+      var track = $(".steps-track", el);
+      var i = -1;
+      function tick() {
+        i = (i + 1) % cards.length;
+        cards.forEach(function (c, k) { c.classList.toggle("is-current", k === i); });
+        dots.forEach(function (d, k) { d.classList.toggle("is-on", k <= i); });
+        if (track) track.style.setProperty("--p", i / (cards.length - 1));
+      }
+      setTimeout(tick, 700);
+      return tick;
+    }
+  };
+
+  // Feature 1: a highlight moves down the comparison
+  DEMOS.rows = {
+    every: 1500,
+    setup: function (el) {
+      var rows = $$(".cmp tbody tr", el);
+      var i = -1;
+      return function () {
+        i = (i + 1) % rows.length;
+        rows.forEach(function (r, k) { r.classList.toggle("is-hot", k === i); });
+      };
+    }
+  };
+
+  // Feature 2: the contract gets scanned and every check pops again
+  DEMOS.scan = {
+    every: 3800,
+    setup: function (el) {
+      var panel = $(".panel", el);
+      function tick() {
+        panel.classList.remove("is-scanning");
+        void panel.offsetWidth;
+        panel.classList.add("is-scanning");
+      }
+      setTimeout(tick, 1700);
+      return tick;
+    }
+  };
+
+  // Feature 3: today travels through the term and into the auction window
+  DEMOS.timeline = {
+    every: 70,
+    setup: function (el) {
+      var panel = $(".tl", el);
+      var mark = $(".tl-mark", el);
+      var rows = $$(".tl-rows .fact", el);
+      var day = 55 / 100 * 112;
+      var startAt = performance.now() + 2200;
+      return function () {
+        if (performance.now() < startAt) return;
+        panel.classList.add("is-live");
+        day += 0.35;
+        if (day > 112) day = 0;
+        var auction = day > 90;
+        mark.style.left = (day / 112 * 100).toFixed(2) + "%";
+        mark.classList.toggle("is-auction", auction);
+        mark.textContent = auction ? "Auction" : "Day " + Math.max(1, Math.round(day));
+        if (rows[1]) rows[1].classList.toggle("is-hot", day > 86 && day < 94);
+      };
+    }
+  };
+
+  // Feature 4: a pointer picks a wallet and the panel connects
+  DEMOS.connect = {
+    every: 4400,
+    setup: function (el) {
+      var wallets = $$(".wallet", el);
+      var cursor = $(".fake-cursor", el);
+      var foot = $("[data-connect-foot]", el);
+      var idle = foot.textContent;
+      var k = 0;
+      function place(x, y) { cursor.style.transform = "translate(" + x.toFixed(0) + "px," + y.toFixed(0) + "px)"; }
+      function rest() { place(el.clientWidth * 0.8, el.clientHeight * 0.86); }
+      rest();
+      return function () {
+        var w = wallets[k++ % wallets.length];
+        var vr = el.getBoundingClientRect();
+        var r = w.getBoundingClientRect();
+        place(r.right - vr.left - 56, r.top - vr.top + r.height / 2 - 6);
+        setTimeout(function () { cursor.classList.add("is-press"); w.classList.add("is-picked"); }, 900);
+        setTimeout(function () {
+          cursor.classList.remove("is-press");
+          foot.classList.add("is-ok");
+          foot.textContent = "Connected · 0x3f2…a19c on Robinhood Chain";
+        }, 1150);
+        setTimeout(function () {
+          w.classList.remove("is-picked");
+          foot.classList.remove("is-ok");
+          foot.textContent = idle;
+          rest();
+        }, 3400);
+      };
+    }
+  };
+
+  // About: key words get underlined, chips appear, progress fills
+  if (words.length) {
+    var KEY = /^(collateral,|stablecoin,|rate|term|approves|changes)$/;
+    words.forEach(function (w) { if (KEY.test(w.textContent)) w.classList.add("is-key"); });
+  }
+  var aboutChips = $$(".about-chip");
+  var aboutBar = $(".about-progress");
+  function paintAbout() {
+    if (!about) return;
+    var span = about.offsetHeight - window.innerHeight;
+    var q = span > 0 ? clamp((-about.getBoundingClientRect().top + window.innerHeight * 0.25) / span, 0, 1) : 1;
+    if (aboutBar) aboutBar.style.setProperty("--p", q.toFixed(3));
+    aboutChips.forEach(function (c) {
+      c.classList.toggle("is-on", reduced || q >= parseFloat(c.getAttribute("data-at")));
+    });
+  }
+  window.addEventListener("scroll", paintAbout, { passive: true });
+  window.addEventListener("resize", paintAbout);
+  paintAbout();
 
   // Safety net for the observer: anything already on screen when a scroll
   // frame runs is revealed there and then, so content never waits on a

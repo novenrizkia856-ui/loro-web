@@ -115,8 +115,9 @@
         <div class="marq-row"><div class="marq-track"><span class="marq-pill">No admin keys</span><span class="marq-pill">Nothing upgradeable</span></div></div>
       </div>
 
-      <div class="phone" role="img" aria-label="The Loro app showing an open ETH collateral loan">
+      <div class="phone" role="img" aria-label="The Loro app showing an open ETH collateral loan" data-loop="phone">
         <div class="phone-screen" aria-hidden="true">
+          <div class="ph-toast"><span class="glyph"><svg><use href="#i-check"/></svg></span><span><b data-t>Offer accepted</b><span data-l>+1,200.00 USDG received</span></span></div>
           <div class="ph-status">
             <span>9:41</span>
             <span class="ph-island"></span>
@@ -128,7 +129,7 @@
           </div>
           <div class="ph-card">
             <p class="ph-label">Loan #1042 · borrowed</p>
-            <p class="ph-big">1,200.00 <small>USDG</small></p>
+            <p class="ph-big"><span data-count-to>1,200.00</span> <small>USDG</small></p>
             <div class="ph-grid">
               <div><span class="ph-label">Collateral</span><b>1.00 ETH</b></div>
               <div><span class="ph-label">Total due</span><b>1,222.19</b></div>
@@ -152,6 +153,13 @@
     <!-- ============ ABOUT (sticky word reveal) ============ -->
     <section class="about" id="about">
       <div class="about-sticky">
+        <div class="about-chips" aria-hidden="true">
+          <div class="about-chip" data-at="0.28" style="--x:6%;--y:20%;--r:-4deg"><span class="glyph glyph-lock"><svg><use href="#i-lock"/></svg></span><span><b>Collateral locked</b><span>1.00 ETH held by the contract</span></span></div>
+          <div class="about-chip" data-at="0.5" style="--x:77%;--y:16%;--r:3deg"><span class="glyph glyph-ok"><svg><use href="#i-check"/></svg></span><span><b>1,200.00 USDG received</b><span>Same transaction</span></span></div>
+          <div class="about-chip" data-at="0.7" style="--x:9%;--y:74%;--r:3deg"><span class="glyph glyph-cal"><svg><use href="#i-cal"/></svg></span><span><b>7.50% for 90 days</b><span>Written on day one</span></span></div>
+          <div class="about-chip" data-at="0.9" style="--x:74%;--y:78%;--r:-3deg"><span class="glyph glyph-eth"><svg><use href="#i-eth"/></svg></span><span><b>No approval step</b><span>Any wallet can borrow</span></span></div>
+        </div>
+        <div class="about-progress" aria-hidden="true"><i></i></div>
         <p class="about-text" id="aboutText">Loro is a lending protocol. Lock collateral, borrow stablecoin, and keep the rate and term you started with. No one approves you first. No one changes the terms later.</p>
       </div>
     </section>
@@ -164,6 +172,8 @@
           <h2 class="sec-title" data-split>Three steps.</h2>
         </div>
 
+        <div class="steps-body" data-loop="steps">
+        <div class="steps-track" aria-hidden="true"><i class="steps-fill"></i><b></b><b></b><b></b></div>
         <div class="steps-row" data-stagger>
           <article class="step" data-reveal data-tilt="4">
             <div class="step-top"><span class="num">1</span><span class="step-when">Day 0</span></div>
@@ -215,11 +225,24 @@
             </div>
           </article>
         </div>
+        </div>
       </div>
     </section>
 
     <!-- ============ WHY LORO ============ -->
     <section class="features" id="features">
+      <div class="feat-sky" aria-hidden="true">
+        <div class="sky">
+          <svg class="sky-clouds" viewBox="0 0 1600 760" preserveAspectRatio="none">
+            <filter id="cloudsFeat" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.0022 0.007" numOctaves="6" seed="31"/>
+              <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3.3 0 0 0 -1.55"/>
+              <feGaussianBlur stdDeviation="0.8"/>
+            </filter>
+            <rect width="1600" height="760" filter="url(#cloudsFeat)"/>
+          </svg>
+        </div>
+      </div>
       <div class="wrap">
         <div class="sec-head">
           <span class="tag" data-reveal>Why Loro</span>
@@ -229,7 +252,7 @@
 
         <div class="feat-grid" data-stagger>
           <article class="feat" data-reveal data-anim data-tilt="2.5">
-            <div class="feat-vis" aria-hidden="true">
+            <div class="feat-vis" aria-hidden="true" data-loop="rows">
               <div class="panel">
                 <table class="cmp">
                   <thead><tr><th></th><th class="is-loro">Loro</th><th>Typical lending</th></tr></thead>
@@ -249,7 +272,7 @@
           </article>
 
           <article class="feat" data-reveal data-anim data-tilt="2.5">
-            <div class="feat-vis" aria-hidden="true">
+            <div class="feat-vis" aria-hidden="true" data-loop="scan">
               <div class="panel">
                 <div class="panel-head">
                   <span><b>LoroLoan</b> <span class="addr" data-contract-addr>Not deployed</span></span>
@@ -270,7 +293,7 @@
           </article>
 
           <article class="feat" data-reveal data-anim data-tilt="2.5">
-            <div class="feat-vis" aria-hidden="true">
+            <div class="feat-vis" aria-hidden="true" data-loop="timeline">
               <div class="panel tl">
                 <div class="fc-row"><b>Loan #1042</b><span class="fc-muted">90 day term + 2 day auction</span></div>
                 <div class="tl-bar">
@@ -291,14 +314,15 @@
           </article>
 
           <article class="feat" data-reveal data-anim data-tilt="2.5">
-            <div class="feat-vis" aria-hidden="true" data-loop="wallets">
+            <div class="feat-vis" aria-hidden="true" data-loop="connect">
+              <span class="fake-cursor"><svg viewBox="0 0 24 24"><path d="M5 3l14 8.2-6.3 1.4 3.6 6.6-2.6 1.4-3.6-6.6L5 18.3z" fill="#0f1729" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
               <div class="panel">
                 <div class="panel-head"><b>Connect a wallet</b><span class="fc-muted">That's the sign up</span></div>
                 <div class="wallets">
                   <div class="wallet"><span class="glyph glyph-usd"><svg><use href="#i-browser"/></svg></span><span><b>Browser wallet</b><span>MetaMask, Rabby, Coinbase Wallet</span></span><svg><use href="#i-chevron"/></svg></div>
                   <div class="wallet"><span class="glyph glyph-cal"><svg><use href="#i-qr"/></svg></span><span><b>WalletConnect</b><span>Scan with a mobile wallet</span></span><svg><use href="#i-chevron"/></svg></div>
                 </div>
-                <div class="panel-foot">No email, no form, no identity check.</div>
+                <div class="panel-foot" data-connect-foot>No email, no form, no identity check.</div>
               </div>
             </div>
             <div class="feat-copy">
@@ -332,7 +356,7 @@
           </filter>
           <rect width="1600" height="520" filter="url(#cloudsDusk)"/>
         </svg>
-        <div class="foot-word">Loro</div>
+        <svg class="foot-word" viewBox="0 0 1000 262" preserveAspectRatio="xMidYMax meet"><text x="0" y="258" textLength="1000" lengthAdjust="spacingAndGlyphs">Loro</text></svg>
       </div>
 
       <div class="wrap">
@@ -388,6 +412,7 @@
   </main>
 
   <script src="assets/vendor/three.min.js"></script>
+  <script src="assets/hero3d.js"></script>
   <script src="assets/content.js"></script>
   <script src="assets/cursor.js"></script>
   <script src="assets/landing.js"></script>
