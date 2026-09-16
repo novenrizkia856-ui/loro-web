@@ -206,5 +206,10 @@ real and come from config.
   from scroll speed, small live demos inside the cards, and a cursor that tilts cards
   and pulls buttons. The cursor only replaces the pointer on mouse and trackpad.
   Everything respects `prefers-reduced-motion`.
-- `assets/favicon.svg` carries the brand colours as literal hex, because an icon
-  cannot read CSS variables.
+- Brand assets live in `assets/brand/`, exported from the logo pack: `logo-light.png`
+  (white lettering, over the sky and the navy footer), `logo-dark.png` (black
+  lettering, solid header and the phone mock), `logo-mono.png` (docs footer),
+  `mark.png` (coin face in the hero), `mark-white.png` and `mark-black.png` (small
+  marks), favicons, `apple-touch-icon.png` and `icon-512.png` (WalletConnect), and
+  `og-image.jpg` (link previews). Re-export from the source files rather than
+  resizing these.

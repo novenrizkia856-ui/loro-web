@@ -230,12 +230,25 @@
       g.fill();
     }
   }
+  // The brand mark (assets/brand/mark.png), filled with one colour so it
+  // works as relief in the height map and as raised metal in the colour map
+  var MARK = new Image();
+  var markReady = new Promise(function (resolve) {
+    MARK.onload = resolve;
+    MARK.onerror = resolve;
+  });
+  MARK.src = "assets/brand/mark.png";
+
   function loroMark(g, s, color) {
-    var c = s / 2;
-    g.fillStyle = color;
-    g.fillRect(c - s * 0.1, c - s * 0.17, s * 0.068, s * 0.32);
-    g.fillRect(c - s * 0.1, c + s * 0.082, s * 0.23, s * 0.068);
-    g.fillRect(c - s * 0.1 + s * 0.068 * 0.1, c - s * 0.028, s * 0.05, s * 0.05);
+    var size = Math.round(s * 0.36);
+    if (!MARK.naturalWidth) return;
+    var tint = makeCanvas(size, size);
+    var t = tint.getContext("2d");
+    t.drawImage(MARK, 0, 0, size, size);
+    t.globalCompositeOperation = "source-in";
+    t.fillStyle = color;
+    t.fillRect(0, 0, size, size);
+    g.drawImage(tint, (s - size) / 2, (s - size) / 2);
   }
 
   var GOLD_TEXT = "LORO • FIXED RATE • FIXED TERM • ";
@@ -652,9 +665,11 @@
     requestAnimationFrame(frame);
   }
 
-  // Coin lettering is drawn with the page font, so wait for it briefly
-  var fontsReady = document.fonts && document.fonts.ready
-    ? Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 1200); })])
-    : Promise.resolve();
-  fontsReady.then(start);
+  // Coin lettering uses the page font and the coin face uses the brand mark,
+  // so wait briefly for both
+  var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  Promise.race([
+    Promise.all([fontsReady, markReady]),
+    new Promise(function (r) { setTimeout(r, 1500); })
+  ]).then(start);
 })();

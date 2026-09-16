@@ -6,7 +6,21 @@
   <title>Loro: Borrow without selling</title>
   <meta name="description" content="Loro is a permissionless lending protocol. Lock a Stock Token or ETH and borrow stablecoin at a rate and term fixed on day one.">
   <meta name="theme-color" content="#2f6bc0">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/brand/favicon-192.png">
+  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+
+  <!-- Link previews -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Loro">
+  <meta property="og:title" content="Loro: Borrow without selling">
+  <meta property="og:description" content="Loro is a permissionless lending protocol. Lock a Stock Token or ETH and borrow stablecoin at a rate and term fixed on day one.">
+  <meta property="og:image" content="assets/brand/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Loro">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="assets/brand/og-image.jpg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,11 +32,6 @@
 <body>
 
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <symbol id="i-mark" viewBox="0 0 32 32">
-      <path d="M9 5.5V26.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="square" fill="none"/>
-      <path d="M9 26.5H23.5" stroke="#ff7a1f" stroke-width="2.6" stroke-linecap="square" fill="none"/>
-      <rect x="8" y="14.9" width="2.2" height="2.2" fill="#ff7a1f"/>
-    </symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
@@ -37,8 +46,8 @@
   <!-- ============ HEADER ============ -->
   <header class="hdr" id="hdr">
     <a class="brand" href="#home" aria-label="Loro, back to top">
-      <svg aria-hidden="true"><use href="#i-mark"/></svg>
-      <span>Loro</span>
+      <img class="brand-logo brand-logo-light" src="assets/brand/logo-light.png" alt="" width="102" height="30">
+      <img class="brand-logo brand-logo-dark" src="assets/brand/logo-dark.png" alt="" width="102" height="30">
     </a>
 
     <nav class="hdr-nav" aria-label="Primary">
@@ -117,14 +126,14 @@
 
       <div class="phone" role="img" aria-label="The Loro app showing an open ETH collateral loan" data-loop="phone">
         <div class="phone-screen" aria-hidden="true">
-          <div class="ph-toast"><span class="glyph"><svg><use href="#i-check"/></svg></span><span><b data-t>Offer accepted</b><span data-l>+1,200.00 USDG received</span></span></div>
+          <div class="ph-toast"><span class="glyph"><img src="assets/brand/mark-white.png" alt=""></span><span><b data-t>Offer accepted</b><span data-l>+1,200.00 USDG received</span></span></div>
           <div class="ph-status">
             <span>9:41</span>
             <span class="ph-island"></span>
             <span class="ph-sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span>
           </div>
           <div class="ph-head">
-            <span class="ph-brand"><svg><use href="#i-mark"/></svg>Loro</span>
+            <span class="ph-brand"><img src="assets/brand/logo-dark.png" alt="" width="64" height="19"></span>
             <span class="badge-s is-green">Robinhood Chain</span>
           </div>
           <div class="ph-card">
@@ -363,9 +372,8 @@
         <div class="foot-card" data-reveal>
           <div class="foot-top">
             <div>
-              <a class="brand" href="#home">
-                <svg aria-hidden="true"><use href="#i-mark"/></svg>
-                <span>Loro</span>
+              <a class="brand" href="#home" aria-label="Loro, back to top">
+                <img class="brand-logo" src="assets/brand/logo-light.png" alt="" width="116" height="34">
               </a>
               <p class="foot-blurb">Loro is a set of contracts, not a company. Fixed rate, fixed term, fully onchain.</p>
               <div class="foot-btns">

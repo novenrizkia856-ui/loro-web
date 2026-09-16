@@ -215,7 +215,7 @@ async function walletConnectProvider() {
       name: meta.name || "Loro",
       description: meta.description || "",
       url: origin,
-      icons: meta.icons && meta.icons.length ? meta.icons : [siteUrl + "/assets/favicon.svg"]
+      icons: meta.icons && meta.icons.length ? meta.icons : [siteUrl + "/assets/brand/icon-512.png"]
     }
   });
   wcProvider.on("disconnect", () => {

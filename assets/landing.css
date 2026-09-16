@@ -191,7 +191,7 @@
 .ph-sig i { width: 3px; border-radius: 1px; background: var(--ink); }
 .ph-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 2px 0; }
 .ph-brand { display: inline-flex; align-items: center; gap: 6px; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
-.ph-brand svg { width: 19px; height: 19px; }
+.ph-brand img { display: block; width: auto; height: 19px; }
 .ph-card { background: var(--card); border-radius: 18px; padding: 14px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05); }
 .ph-label { color: var(--muted); font-size: 12.5px; }
 .ph-big { font-size: 34px; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; }
@@ -486,8 +486,7 @@
 @media (min-width: 768px) { .foot-card { padding: 80px 72px 32px; } }
 .foot-top { display: grid; grid-template-columns: 1fr; gap: 40px; }
 @media (min-width: 900px) { .foot-top { grid-template-columns: 1.3fr 2fr; gap: 72px; } }
-.foot-card .brand { font-size: 22px; }
-.foot-card .brand svg { width: 26px; height: 26px; }
+.foot-card .brand-logo { height: 34px; }
 .foot-blurb { margin-top: 16px; max-width: 30ch; font-size: 15.5px; line-height: 1.6; color: var(--navy-muted); }
 .foot-btns { display: flex; gap: 10px; margin-top: 28px; }
 .foot-btns .btn-dark { background: var(--navy-2); color: var(--navy-text); border-color: var(--navy-line); }
@@ -568,6 +567,7 @@
   transform: translateY(-130%) scale(0.96);
 }
 .ph-toast .glyph { width: 32px; height: 32px; flex-basis: 32px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); }
+.ph-toast .glyph img { width: 18px; height: 18px; }
 .ph-toast b { display: block; font-size: 13px; font-weight: 600; }
 .ph-toast [data-l] { display: block; font-size: 12px; color: var(--muted); }
 .ph-toast.is-on { animation: ph-toast 3.6s var(--ease) both; }

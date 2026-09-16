@@ -6,7 +6,21 @@
   <title>Loro: Documentation</title>
   <meta name="description" content="How Loro works: fixed rate, fixed term, isolated peer to peer loans against Stock Tokens and ETH, with a timestamp default and a Dutch auction.">
   <meta name="theme-color" content="#2f6bc0">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/brand/favicon-192.png">
+  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+
+  <!-- Link previews -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Loro">
+  <meta property="og:title" content="Loro: Documentation">
+  <meta property="og:description" content="How Loro works: fixed rate, fixed term, isolated peer to peer loans against Stock Tokens and ETH, with a timestamp default and a Dutch auction.">
+  <meta property="og:image" content="assets/brand/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Loro">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="assets/brand/og-image.jpg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,11 +32,6 @@
 <body>
 
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <symbol id="i-mark" viewBox="0 0 32 32">
-      <path d="M9 5.5V26.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="square" fill="none"/>
-      <path d="M9 26.5H23.5" stroke="#ff7a1f" stroke-width="2.6" stroke-linecap="square" fill="none"/>
-      <rect x="8" y="14.9" width="2.2" height="2.2" fill="#ff7a1f"/>
-    </symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V6M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </svg>
@@ -30,8 +39,8 @@
   <!-- ============ HEADER ============ -->
   <header class="hdr" id="hdr">
     <a class="brand" href="./" aria-label="Loro home">
-      <svg aria-hidden="true"><use href="#i-mark"/></svg>
-      <span>Loro</span>
+      <img class="brand-logo brand-logo-light" src="assets/brand/logo-light.png" alt="" width="102" height="30">
+      <img class="brand-logo brand-logo-dark" src="assets/brand/logo-dark.png" alt="" width="102" height="30">
     </a>
 
     <nav class="hdr-nav" aria-label="Primary">
@@ -679,7 +688,7 @@ price   = floor + ceil((ceiling - floor) * (window - elapsed) / window)   otherw
 
   <footer class="docs-foot">
     <div class="wrap docs-foot-inner">
-      <p>© 2026 Loro</p>
+      <p class="docs-foot-brand"><img src="assets/brand/logo-mono.png" alt="Loro" width="68" height="20"><span>© 2026</span></p>
       <p><a href="./">Home</a><a href="app">App</a><a href="docs">Docs</a></p>
     </div>
   </footer>

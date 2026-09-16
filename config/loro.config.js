@@ -70,7 +70,7 @@ export const walletConnect = {
   metadata: {
     name: "Loro",
     description: "Borrow without selling. Fixed rate, fixed term, fully onchain.",
-    icons: []   // absolute url(s) to a square icon; filled from the page origin if empty
+    icons: []   // absolute url(s) to a square icon; empty uses assets/brand/icon-512.png on the page origin
   }
 };
 

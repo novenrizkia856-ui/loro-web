@@ -221,7 +221,9 @@ a.addr[href]:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ============ FOOTER ============ */
 .docs-foot { border-top: 1px solid var(--line); padding: 24px 0; font-size: 14px; color: var(--muted); }
-.docs-foot-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+.docs-foot-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.docs-foot-brand { display: inline-flex; align-items: center; gap: 12px; }
+.docs-foot-brand img { display: block; width: auto; height: 20px; opacity: 0.85; }
 .docs-foot a { margin-left: 20px; color: var(--ink-2); }
 .docs-foot a:first-child { margin-left: 0; }
 .docs-foot a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
