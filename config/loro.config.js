@@ -56,9 +56,15 @@ export const networks = {
 export const defaultNetwork = "robinhood";
 export const docsUrl = "docs";
 
-/* Project token contract address (CA), separate from LoroLoan and LoroLens.
-   Shown in the landing page's "Contract address" bar. null = "Coming soon".
-   At token launch, replace null with the address in quotes. */
+/* ============================================================
+   TOKEN LAUNCH: the one line to change
+   Project token contract address (CA), separate from LoroLoan and LoroLens.
+   Shown in the landing page's "Contract address" bar with a copy button.
+     null            -> "Coming soon"
+     "0x..." (quoted) -> the address, live seconds after the deploy
+   Example: export const tokenAddress = "0x1234...abcd";
+   A malformed value keeps "Coming soon" and logs a warning in the console.
+   ============================================================ */
 export const tokenAddress = null;
 
 /* WalletConnect (Reown). The project id is a public identifier, not a

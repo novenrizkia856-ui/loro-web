@@ -67,7 +67,13 @@
      "Coming soon" until set. */
   function applyConfig(cfg) {
     cfg = cfg || {};
-    var address = cfg.tokenAddress || "";
+    // Pasted in a hurry at launch: tolerate stray spaces or line breaks,
+    // but never show something that is not a full address
+    var address = String(cfg.tokenAddress || "").replace(/\s+/g, "");
+    if (address && !/^0x[0-9a-fA-F]{40}$/.test(address)) {
+      if (window.console) console.warn("Loro: tokenAddress in config/loro.config.js is not a valid address:", cfg.tokenAddress);
+      address = "";
+    }
 
     /* ---- Contract address pill ---- */
     var valueEl = $("#addrValue");
@@ -80,9 +86,12 @@
         valueEl.setAttribute("title", address);
         btn.disabled = false;
         btn.removeAttribute("title");
+        btn._address = address;
         if (!btn._bound) {
           btn._bound = true;
           btn.addEventListener("click", function () {
+            var address = btn._address;
+            if (!address) return;
             copyText(address).then(function () {
               btn.classList.add("is-copied");
               if (btnText) btnText.textContent = "Copied";
@@ -113,6 +122,8 @@
         }
       } else {
         valueEl.textContent = "Coming soon";
+        valueEl.removeAttribute("title");
+        btn._address = "";
         btn.disabled = true;
         btn.setAttribute("title", "Not deployed yet.");
       }

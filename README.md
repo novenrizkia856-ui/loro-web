@@ -111,7 +111,7 @@ the codebase hardcodes an address, chain id or RPC url.
 | `contracts.loroLoan`, `contracts.loroLens` | deployment output |
 | `stablecoin.address` | optional; if set, it must equal `LoroLoan.stablecoin()` or the app stops |
 | `collateral[]` | assets offered as shortcuts in the offer form; ETH is `0x0000000000000000000000000000000000000000`. Decimals and symbols are always read from chain |
-| `tokenAddress` | the project token contract address, separate from LoroLoan and LoroLens. The landing page's "Contract address" bar shows it with a copy button; while `null` it reads "Coming soon". At launch this one line is the only change |
+| `tokenAddress` | the project token contract address, separate from LoroLoan and LoroLens. The landing page's "Contract address" bar shows it with a copy button; while `null` it reads "Coming soon". At launch this one line is the only change: stray spaces are trimmed, a malformed value keeps "Coming soon" and logs a console warning, and `vercel.json` serves `config/` with `no-cache` so visitors see it as soon as the deploy is live |
 | `walletConnect.projectId` | Reown (WalletConnect) project id from https://dashboard.reown.com. Public, not a secret. Empty disables WalletConnect. Add every domain that serves the site (the Vercel domain, custom domains, `localhost`) to the project's allowlist, or wallets will refuse to connect |
 | `walletConnect.metadata` | name, description and icon shown inside the wallet during connection |
 
