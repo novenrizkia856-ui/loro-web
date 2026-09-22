@@ -65,7 +65,7 @@ export const docsUrl = "docs";
    Example: export const tokenAddress = "0x1234...abcd";
    A malformed value keeps "Coming soon" and logs a warning in the console.
    ============================================================ */
-export const tokenAddress = null;
+export const tokenAddress = "0xb0e604b22ed97078e614daa9a6a69a88111e54a3";
 
 /* WalletConnect (Reown). The project id is a public identifier, not a
    secret: create one at https://dashboard.reown.com and add the site's
