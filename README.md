@@ -15,7 +15,7 @@ app.html                   the app: borrow, lend, my loans, auctions
 docs.html                  protocol documentation (served at /docs)
 config/loro.config.js      networks, addresses, assets  (the only place these live)
 config/loro.local.js       GENERATED Anvil addresses, localhost only, not deployed
-assets/base.css            tokens, reset, header, buttons, sky, cursor (both pages)
+assets/base.css            tokens, reset, header, buttons, sky, pointer effects (every page)
 assets/landing.css         landing sections and their motion
 assets/app.css             app components, built on base.css tokens
 assets/landing.js          landing config binding, 3D hero objects, scroll motion, reveals
@@ -203,8 +203,8 @@ real and come from config.
 - The hero objects are real 3D (three.js) with a baked studio environment for
   reflections. Without WebGL the hero still works; the canvas stays empty.
 - Motion: word by word title reveals, scroll reveals, the phone rising, marquee skew
-  from scroll speed, small live demos inside the cards, and a cursor that tilts cards
-  and pulls buttons. The cursor only replaces the pointer on mouse and trackpad.
+  from scroll speed, small live demos inside the cards, and cards and buttons that
+  react to the pointer on mouse and trackpad. The system cursor is never replaced.
   Everything respects `prefers-reduced-motion`.
 - Loading: the header, hero copy and sky paint first. three.js (600 KB) and
   `hero3d.js` are injected by `landing.js` after the first paint, and the scene
