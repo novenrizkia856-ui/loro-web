@@ -1,39 +1,19 @@
 /* ============================================================
-   LORO — cursor
-   A dot and a trailing ring in place of the system pointer,
-   controls that lean toward the pointer, and cards that tilt
-   under it. Mouse and trackpad only; touch keeps native input.
-   Shared by index.html and app.html. No dependencies.
+   LORO — pointer effects
+   The system cursor stays as it is. Controls lean slightly toward
+   the pointer and cards tilt under it with a soft light. Mouse and
+   trackpad only; touch keeps native input. Shared by every page.
+   No dependencies.
    ============================================================ */
 
 (function () {
   "use strict";
 
   if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var root = document.documentElement;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  var HOVER = "a, button, label, select, summary, [role='button'], [data-cursor]";
-  var TEXT = "input, textarea, [contenteditable='true']";
   var MAGNET = ".btn, .cta-big, .ca-copy, .app-tab, .hdr-nav a, .burger, .brand";
   var TILT = "[data-tilt], .loan-card";
-
-  var dot = document.createElement("div");
-  var ring = document.createElement("div");
-  dot.className = "cursor-dot";
-  ring.className = "cursor-ring";
-  document.body.appendChild(dot);
-  document.body.appendChild(ring);
-  root.classList.add("has-cursor");
-
-  var x = -100, y = -100, rx = x, ry = y, raf = 0;
-  function follow() {
-    rx += (x - rx) * 0.22;
-    ry += (y - ry) * 0.22;
-    dot.style.transform = "translate3d(" + x + "px," + y + "px,0)";
-    ring.style.transform = "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0)";
-    raf = (Math.abs(x - rx) > 0.2 || Math.abs(y - ry) > 0.2) ? requestAnimationFrame(follow) : 0;
-  }
 
   var magnetEl = null;
   function magnet(target, e) {
@@ -68,25 +48,12 @@
 
   document.addEventListener("pointermove", function (e) {
     if (e.pointerType && e.pointerType !== "mouse" && e.pointerType !== "pen") return;
-    x = e.clientX;
-    y = e.clientY;
-    root.classList.add("cursor-on");
-    if (!raf) raf = requestAnimationFrame(follow);
-
     var t = e.target instanceof Element ? e.target : null;
-    var onText = !!(t && t.closest(TEXT));
-    root.classList.toggle("cursor-text", onText);
-    root.classList.toggle("cursor-hover", !onText && !!(t && t.closest(HOVER)));
-
-    if (reduced) return;
     magnet(t, e);
     tilt(t, e);
   }, { passive: true });
 
-  document.addEventListener("pointerdown", function () { root.classList.add("cursor-down"); });
-  document.addEventListener("pointerup", function () { root.classList.remove("cursor-down"); });
   document.addEventListener("mouseleave", function () {
-    root.classList.remove("cursor-on");
     if (magnetEl) { magnetEl.style.transform = ""; magnetEl = null; }
     if (tiltEl) { tiltEl.classList.remove("is-tilting"); tiltEl.style.transform = ""; tiltEl = null; }
   });

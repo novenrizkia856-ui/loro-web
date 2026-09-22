@@ -240,7 +240,34 @@
   // background tab, and the hero copy must never stay hidden.
   if (hero) setTimeout(function () { hero.classList.add("is-ready"); }, reduced ? 0 : 150);
 
-  // The 3D objects live in assets/hero3d.js
+  /* The 3D objects live in assets/hero3d.js. three.js is 600 KB and the
+     scene takes work to build, so both load only after the page has
+     painted: the header and hero copy never wait on them. */
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = reject;
+      document.body.appendChild(s);
+    });
+  }
+  function loadHero3d() {
+    if (!$("#hero3d")) return;
+    loadScript("assets/vendor/three.min.js")
+      .then(function () { return loadScript("assets/hero3d.js"); })
+      .catch(function () { /* the hero stands on its own without 3D */ });
+  }
+  // Two frames after DOMContentLoaded the first paint has happened. The
+  // timer covers tabs that do not draw frames yet (opened in background).
+  var heroQueued = false;
+  function queueHero3d() {
+    if (heroQueued) return;
+    heroQueued = true;
+    loadHero3d();
+  }
+  requestAnimationFrame(function () { requestAnimationFrame(queueHero3d); });
+  setTimeout(queueHero3d, 400);
 
   /* ============================================================
      PILL MARQUEE (content.js ticker)

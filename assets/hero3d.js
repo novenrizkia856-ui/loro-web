@@ -10,6 +10,10 @@
      enamel, faceted crystal with iridescence, pearl sheen
    The objects rise in, bob, lean toward the pointer and scatter
    upward as the hero scrolls away.
+
+   Loading: landing.js injects three.js and this file after the page
+   has painted, and the setup below is split into small steps, one per
+   frame, so the header and the hero copy never wait on the 3D.
    ============================================================ */
 
 (function () {
@@ -31,13 +35,13 @@
     return; // no WebGL: the hero stands on its own
   }
   if (THREE.ColorManagement) THREE.ColorManagement.legacyMode = false;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.92;
   renderer.physicallyCorrectLights = true;
   var maxAniso = renderer.capabilities.getMaxAnisotropy();
-  var TEX = small ? 512 : 1024;
+  var TEX = small ? 512 : 768;
 
   var mouse = { x: 0, y: 0, tx: 0, ty: 0 };
   window.addEventListener("pointermove", function (e) {
@@ -400,21 +404,28 @@
      MATERIALS
      ============================================================ */
   var M = {};
-  function buildMaterials() {
-    var scratches = scratchRoughness(40, 220);
-    var brushed = brushedRoughness(92);
-    var plasticGrain = scratchRoughness(90, 60);
-
-    M.goldFace = goldFaceMaterial();
-    M.goldEdge = new THREE.MeshPhysicalMaterial({
-      color: 0xf2c15b, metalness: 1, roughness: 0.6, roughnessMap: scratches,
-      normalMap: reededNormal(150), normalScale: new THREE.Vector2(1, 1), envMapIntensity: 1.2
-    });
-    M.usdgFace = usdgFaceMaterial();
-    M.silverEdge = new THREE.MeshPhysicalMaterial({
-      color: 0xdfe5ec, metalness: 1, roughness: 0.55, roughnessMap: scratches,
-      normalMap: reededNormal(120), envMapIntensity: 1.2
-    });
+  var scratches, brushed, plasticGrain;
+  // Each entry builds one texture set; they run one per frame
+  var MATERIAL_STEPS = [
+    function () { scratches = scratchRoughness(40, 220); },
+    function () { brushed = brushedRoughness(92); plasticGrain = scratchRoughness(90, 60); },
+    function () { M.goldFace = goldFaceMaterial(); },
+    function () {
+      M.goldEdge = new THREE.MeshPhysicalMaterial({
+        color: 0xf2c15b, metalness: 1, roughness: 0.6, roughnessMap: scratches,
+        normalMap: reededNormal(150), normalScale: new THREE.Vector2(1, 1), envMapIntensity: 1.2
+      });
+    },
+    function () { M.usdgFace = usdgFaceMaterial(); },
+    function () {
+      M.silverEdge = new THREE.MeshPhysicalMaterial({
+        color: 0xdfe5ec, metalness: 1, roughness: 0.55, roughnessMap: scratches,
+        normalMap: reededNormal(120), envMapIntensity: 1.2
+      });
+    },
+    buildPlainMaterials
+  ];
+  function buildPlainMaterials() {
     M.chrome = new THREE.MeshPhysicalMaterial({ color: 0xe8ecf1, metalness: 1, roughness: 0.3, roughnessMap: scratches, envMapIntensity: 1.2 });
     M.anodized = new THREE.MeshPhysicalMaterial({
       color: 0xff6a12, metalness: 0.85, roughness: 0.9, roughnessMap: brushed,
@@ -558,9 +569,18 @@
   /* ============================================================
      SCENE
      ============================================================ */
+  // Run fns one per frame (setTimeout keeps going in a background tab)
+  function runSteps(fns, done) {
+    var i = 0;
+    (function next() {
+      if (i >= fns.length) return done();
+      fns[i++]();
+      setTimeout(next, 0);
+    })();
+  }
+
   function start() {
     var scene = new THREE.Scene();
-    scene.environment = buildEnvironment();
     var camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
     camera.position.set(0, 0, 17);
 
@@ -571,7 +591,6 @@
     fill.position.set(8, -3, 6);
     scene.add(fill);
 
-    buildMaterials();
 
     // nx/ny place each object in screen space (-1..1); mx/my on phones,
     // where the copy fills the middle and objects keep to the edges.
@@ -587,13 +606,21 @@
     ];
 
     var items = [];
+    var readyAt = Infinity;
+    var steps = [function () { scene.environment = buildEnvironment(); }].concat(MATERIAL_STEPS);
+    // Objects join the scene one per frame and their shaders compile right
+    // away, so the first rendered frame has nothing left to compile. The
+    // render loop only starts once every step is done.
     DEFS.forEach(function (d, k) {
       if (small && d.wide) return;
-      var obj = d.make();
-      var holder = new THREE.Group();
-      holder.add(obj);
-      scene.add(holder);
-      items.push({ d: d, holder: holder, obj: obj, phase: Math.random() * Math.PI * 2, delay: k * 0.09 });
+      steps.push(function () {
+        var obj = d.make();
+        var holder = new THREE.Group();
+        holder.add(obj);
+        scene.add(holder);
+        renderer.compile(scene, camera);
+        items.push({ d: d, holder: holder, obj: obj, phase: Math.random() * Math.PI * 2, delay: k * 0.09 });
+      });
     });
 
     var halfH = 1, halfW = 1;
@@ -618,7 +645,6 @@
       return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
     }
 
-    var readyAt = performance.now() + 150;
     function frame(now) {
       requestAnimationFrame(frame);
       if (!visible || document.hidden) return;
@@ -662,7 +688,11 @@
 
       renderer.render(scene, camera);
     }
-    requestAnimationFrame(frame);
+    runSteps(steps, function () {
+      readyAt = performance.now() + 60;
+      canvas.classList.add("is-ready");
+      requestAnimationFrame(frame);
+    });
   }
 
   // Coin lettering uses the page font and the coin face uses the brand mark,

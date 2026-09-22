@@ -19,7 +19,7 @@ assets/base.css            tokens, reset, header, buttons, sky, cursor (both pag
 assets/landing.css         landing sections and their motion
 assets/app.css             app components, built on base.css tokens
 assets/landing.js          landing config binding, 3D hero objects, scroll motion, reveals
-assets/cursor.js           custom cursor, magnetic controls, card tilt (every page)
+assets/cursor.js           pointer effects: magnetic controls, card tilt (every page)
 assets/docs.css            documentation layout
 assets/docs.js             documentation contents menu and deployment values
 assets/content.js          landing marquee copy
@@ -206,6 +206,10 @@ real and come from config.
   from scroll speed, small live demos inside the cards, and a cursor that tilts cards
   and pulls buttons. The cursor only replaces the pointer on mouse and trackpad.
   Everything respects `prefers-reduced-motion`.
+- Loading: the header, hero copy and sky paint first. three.js (600 KB) and
+  `hero3d.js` are injected by `landing.js` after the first paint, and the scene
+  is built in small steps, one per frame, so nothing blocks the page. Other
+  scripts are `defer`red.
 - Brand assets live in `assets/brand/`, exported from the logo pack: `logo-light.png`
   (white lettering, over the sky and the navy footer), `logo-dark.png` (black
   lettering, solid header and the phone mock), `logo-mono.png` (docs footer),
